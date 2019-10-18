@@ -28,7 +28,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Gorgon.Core;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.IO
 {

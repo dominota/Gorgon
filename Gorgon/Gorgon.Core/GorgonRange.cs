@@ -27,7 +27,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Gorgon.Math;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 using Newtonsoft.Json;
 
 namespace Gorgon.Core

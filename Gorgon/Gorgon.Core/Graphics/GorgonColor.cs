@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Gorgon.Core;
 using Gorgon.Math;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 using DX = SharpDX;
 
 namespace Gorgon.Graphics

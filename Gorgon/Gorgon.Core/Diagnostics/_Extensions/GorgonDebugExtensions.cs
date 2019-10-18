@@ -28,7 +28,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using Gorgon.Core;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.Diagnostics
 {

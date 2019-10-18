@@ -30,7 +30,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Gorgon.Core;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.IO
 {

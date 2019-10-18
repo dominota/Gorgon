@@ -28,7 +28,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.IO
 {

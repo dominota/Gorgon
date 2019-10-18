@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Gorgon.Math;
 using Gorgon.Native;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.IO
 {

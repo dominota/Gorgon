@@ -34,7 +34,7 @@ using System.Text;
 using System.Threading;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.PlugIns
 {

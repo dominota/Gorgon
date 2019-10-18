@@ -26,7 +26,7 @@
 
 using Gorgon.Core;
 using Gorgon.Math;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.Graphics
 {

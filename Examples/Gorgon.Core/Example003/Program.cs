@@ -177,6 +177,7 @@ namespace Gorgon.Examples
         {
             try
             {
+                Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 

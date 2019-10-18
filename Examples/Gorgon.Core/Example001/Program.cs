@@ -172,6 +172,7 @@ namespace Gorgon.Examples
             // This is here for any windows forms elements that get displayed.
             // Without this, the elements will not use the visual styles and will 
             // default to older styles.
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.DoEvents();
 

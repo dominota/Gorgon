@@ -28,7 +28,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Gorgon.IO;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.Native
 {

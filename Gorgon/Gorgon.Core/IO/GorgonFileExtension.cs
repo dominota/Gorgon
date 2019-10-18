@@ -25,9 +25,8 @@
 #endregion
 
 using System;
-using System.Windows.Forms;
 using Gorgon.Core;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.IO
 {
@@ -36,7 +35,7 @@ namespace Gorgon.IO
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This type allows for easy manipulation of file extensions and their descriptions when populating a <see cref="OpenFileDialog"/>, or <see cref="SaveFileDialog"/> extension list.
+    /// This type allows for easy manipulation of file extensions and their descriptions when populating a <c>OpenFileDialog</c>, or <c>SaveFileDialog</c> extension list.
     /// </para>
     /// <para>
     /// The file extensions can be compared to each other to determine uniqueness. When comparing file extensions, the comparison is done with a case-insensitive comparer.

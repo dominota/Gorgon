@@ -28,7 +28,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Gorgon.Core;
-using Gorgon.Properties;
+using Gorgon.Core.Properties;
 
 namespace Gorgon.Memory
 {
