@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
 using Gorgon.IO;
-using Gorgon.Core.Properties;
+using Gorgon.Properties;
 
 namespace Gorgon.PlugIns
 {

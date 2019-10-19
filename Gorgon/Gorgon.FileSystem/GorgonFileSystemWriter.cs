@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -104,6 +105,7 @@ namespace Gorgon.IO
     /// ]]>
     /// </code>
     /// </example>
+    [PartNotDiscoverable]
     public class GorgonFileSystemWriter
         : GorgonPlugIn, IGorgonFileSystemWriter<FileStream>
     {

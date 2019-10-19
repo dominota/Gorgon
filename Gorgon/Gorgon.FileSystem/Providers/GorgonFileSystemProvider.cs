@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using Gorgon.Collections;
@@ -68,6 +69,7 @@ namespace Gorgon.IO.Providers
     /// This type allows the mounting of a directory so that data can be read from the native operating system file system. This is the default provider for any <see cref="IGorgonFileSystem"/>.
     /// </para>
     /// </remarks>
+    [PartNotDiscoverable]
     public class GorgonFileSystemProvider
         : GorgonPlugIn, IGorgonFileSystemProvider
     {

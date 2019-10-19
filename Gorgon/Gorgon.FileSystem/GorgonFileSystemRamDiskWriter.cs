@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -102,6 +103,7 @@ namespace Gorgon.IO
     /// ]]>
     /// </code>
     /// </example>
+    [PartNotDiscoverable]
     public class GorgonFileSystemRamDiskWriter
         : GorgonPlugIn, IGorgonFileSystemWriter<Stream>
     {

@@ -31,7 +31,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Gorgon.IO;
 using Gorgon.Math;
-using Gorgon.Core.Properties;
+using Gorgon.Properties;
 using DX = SharpDX;
 
 namespace Gorgon.Native

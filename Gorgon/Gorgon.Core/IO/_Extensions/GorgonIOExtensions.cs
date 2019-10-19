@@ -31,7 +31,7 @@ using System.Linq;
 using System.Text;
 using Gorgon.Core;
 using Gorgon.Math;
-using Gorgon.Core.Properties;
+using Gorgon.Properties;
 
 namespace Gorgon.IO
 {

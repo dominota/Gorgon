@@ -37,7 +37,7 @@ using System.Threading;
 using Gorgon.Core;
 using Gorgon.Diagnostics.LogProviders;
 using Gorgon.IO;
-using Gorgon.Core.Properties;
+using Gorgon.Properties;
 
 namespace Gorgon.Diagnostics
 {

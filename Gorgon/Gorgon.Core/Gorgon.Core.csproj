@@ -19,6 +19,7 @@ This contains utilities and basic functionality that all other Gorgon APIs are b
     <PackageReleaseNotes>Initial .NET Core version.</PackageReleaseNotes>
     <PackageIconUrl>https://www.tape-worm.net/favicon.ico</PackageIconUrl>
     <NeutralLanguage>en-CA</NeutralLanguage>
+    <RootNamespace>Gorgon</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

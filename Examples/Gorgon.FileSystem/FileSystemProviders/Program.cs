@@ -110,7 +110,7 @@ namespace Gorgon.Examples
         /// <returns>The number of file system provider plug ins.</returns>
         private static int LoadFileSystemProviders()
         {
-            _pluginAssemblies.LoadPlugInAssemblies(PlugInPath, "Gorgon.FileSystem.*");
+            _pluginAssemblies.LoadPlugInAssemblies(PlugInPath, "Gorgon.FileSystem.*.dll");
 
             // Get the file system provider factory so we can retrieve our newly loaded providers.
             IGorgonFileSystemProviderFactory providerFactory = new GorgonFileSystemProviderFactory(_pluginService, _log);

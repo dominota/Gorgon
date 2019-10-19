@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using Gorgon.Collections;
@@ -72,6 +73,7 @@ namespace Gorgon.IO.Providers
     /// Because this provider stores file data in memory, it is not recommended for use with a large amount of file data.
     /// </para>
     /// </remarks>
+    [PartNotDiscoverable]
     public class GorgonFileSystemRamDiskProvider
         : GorgonPlugIn, IGorgonFileSystemProvider
     {
