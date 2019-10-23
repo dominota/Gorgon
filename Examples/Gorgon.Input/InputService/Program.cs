@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using Gorgon.Core;
 using Gorgon.Examples;
-using Gorgon.Input.Example.Properties;
+using Gorgon.Examples.Properties;
 using Gorgon.PlugIns;
 using Gorgon.UI;
 
