@@ -67,6 +67,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GamingDeviceDrivers", "Exam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XInput", "Examples\Gorgon.Input\XInput\XInput.csproj", "{DE9A23AA-338E-4785-B697-2F4BE2B32B2C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Graphics", "Graphics", "{24D17744-1E5C-40B5-B591-505C391450BF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gorgon.Graphics.Imaging", "Gorgon\Gorgon.Graphics.Imaging\Gorgon.Graphics.Imaging.csproj", "{46368D90-60BD-4006-87FD-1B30DAD70416}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Images", "Examples\Gorgon.Graphics\Images\Images.csproj", "{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -169,6 +175,14 @@ Global
 		{DE9A23AA-338E-4785-B697-2F4BE2B32B2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE9A23AA-338E-4785-B697-2F4BE2B32B2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE9A23AA-338E-4785-B697-2F4BE2B32B2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46368D90-60BD-4006-87FD-1B30DAD70416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46368D90-60BD-4006-87FD-1B30DAD70416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46368D90-60BD-4006-87FD-1B30DAD70416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46368D90-60BD-4006-87FD-1B30DAD70416}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -197,6 +211,8 @@ Global
 		{5E19764C-CC76-4EEC-9E87-9445DDCEA200} = {2540F2A4-BD98-4AA8-8C38-061060D20D95}
 		{E0C8545E-81C4-4F2A-A01D-6C71DE1291B1} = {2540F2A4-BD98-4AA8-8C38-061060D20D95}
 		{DE9A23AA-338E-4785-B697-2F4BE2B32B2C} = {2540F2A4-BD98-4AA8-8C38-061060D20D95}
+		{24D17744-1E5C-40B5-B591-505C391450BF} = {26ABE108-3ABC-4914-8CAD-3D00E8A11912}
+		{9EFDEDF0-70C2-4B57-A97F-6502AEA2FE6F} = {24D17744-1E5C-40B5-B591-505C391450BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BA39288E-AC40-4B74-8AE3-AB6E94D02D77}
