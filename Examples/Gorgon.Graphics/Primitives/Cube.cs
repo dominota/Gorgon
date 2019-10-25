@@ -144,49 +144,47 @@ namespace Gorgon.Examples
             DX.Quaternion.RotationYawPitchRoll(angle.Y.ToRadians(), angle.X.ToRadians(), angle.Z.ToRadians(), out DX.Quaternion orientation);
             DX.Matrix.RotationQuaternion(ref orientation, out _orientation);
 
-            using (var vertexData = new GorgonNativeBuffer<Vertex3D>(VertexCount))
-            using (var indexData = new GorgonNativeBuffer<int>(IndexCount))
-            {
-                // Front.
-                GetVertices(vertexData, 0, DX.Vector3.UnitY, -DX.Vector3.UnitZ, size, textureCoordinates, columnsPerFace, rowsPerFace);
-                // Bottom.
-                GetVertices(vertexData, faceVertexCount, -DX.Vector3.UnitZ, -DX.Vector3.UnitY, size, textureCoordinates, columnsPerFace, rowsPerFace);
-                // Back.
-                GetVertices(vertexData, faceVertexCount * 2, DX.Vector3.UnitY, DX.Vector3.UnitZ, size, textureCoordinates, columnsPerFace, rowsPerFace);
-                // Top.
-                GetVertices(vertexData, faceVertexCount * 3, DX.Vector3.UnitZ, DX.Vector3.UnitY, size, textureCoordinates, columnsPerFace, rowsPerFace);
-                // Left.
-                GetVertices(vertexData, faceVertexCount * 4, DX.Vector3.UnitY, -DX.Vector3.UnitX, size, textureCoordinates, columnsPerFace, rowsPerFace);
-                // Right
-                GetVertices(vertexData, faceVertexCount * 5, DX.Vector3.UnitY, DX.Vector3.UnitX, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            using var vertexData = new GorgonNativeBuffer<Vertex3D>(VertexCount);
+            using var indexData = new GorgonNativeBuffer<int>(IndexCount);
+            // Front.
+            GetVertices(vertexData, 0, DX.Vector3.UnitY, -DX.Vector3.UnitZ, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            // Bottom.
+            GetVertices(vertexData, faceVertexCount, -DX.Vector3.UnitZ, -DX.Vector3.UnitY, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            // Back.
+            GetVertices(vertexData, faceVertexCount * 2, DX.Vector3.UnitY, DX.Vector3.UnitZ, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            // Top.
+            GetVertices(vertexData, faceVertexCount * 3, DX.Vector3.UnitZ, DX.Vector3.UnitY, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            // Left.
+            GetVertices(vertexData, faceVertexCount * 4, DX.Vector3.UnitY, -DX.Vector3.UnitX, size, textureCoordinates, columnsPerFace, rowsPerFace);
+            // Right
+            GetVertices(vertexData, faceVertexCount * 5, DX.Vector3.UnitY, DX.Vector3.UnitX, size, textureCoordinates, columnsPerFace, rowsPerFace);
 
-                GetIndices(indexData, 0, 0, columnsPerFace, rowsPerFace);
-                GetIndices(indexData, faceIndexCount, faceVertexCount, columnsPerFace, rowsPerFace);
-                GetIndices(indexData, faceIndexCount * 2, faceVertexCount * 2, columnsPerFace, rowsPerFace);
-                GetIndices(indexData, faceIndexCount * 3, faceVertexCount * 3, columnsPerFace, rowsPerFace);
-                GetIndices(indexData, faceIndexCount * 4, faceVertexCount * 4, columnsPerFace, rowsPerFace);
-                GetIndices(indexData, faceIndexCount * 5, faceVertexCount * 5, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, 0, 0, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, faceIndexCount, faceVertexCount, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, faceIndexCount * 2, faceVertexCount * 2, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, faceIndexCount * 3, faceVertexCount * 3, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, faceIndexCount * 4, faceVertexCount * 4, columnsPerFace, rowsPerFace);
+            GetIndices(indexData, faceIndexCount * 5, faceVertexCount * 5, columnsPerFace, rowsPerFace);
 
-                CalculateTangents(vertexData, indexData);
+            CalculateTangents(vertexData, indexData);
 
-                VertexBuffer = new GorgonVertexBuffer(graphics,
-                                                      new GorgonVertexBufferInfo("CubeVB")
-                                                      {
-                                                          Usage = ResourceUsage.Immutable,
-                                                          SizeInBytes = vertexData.SizeInBytes
-                                                      },
-                                                      vertexData.Cast<byte>());
+            VertexBuffer = new GorgonVertexBuffer(graphics,
+                                                  new GorgonVertexBufferInfo("CubeVB")
+                                                  {
+                                                      Usage = ResourceUsage.Immutable,
+                                                      SizeInBytes = vertexData.SizeInBytes
+                                                  },
+                                                  vertexData.Cast<byte>());
 
 
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo("CubeIB")
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        Use16BitIndices = false,
-                                                        IndexCount = IndexCount
-                                                    },
-                                                    indexData);
-            }
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo("CubeIB")
+                                                {
+                                                    Usage = ResourceUsage.Immutable,
+                                                    Use16BitIndices = false,
+                                                    IndexCount = IndexCount
+                                                },
+                                                indexData);
         }
         #endregion
     }

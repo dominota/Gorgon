@@ -336,13 +336,11 @@ namespace Gorgon.IO
                 return false;
             }
 
-            using (GorgonBinaryReader binReader = reader.OpenChunk(VersionData))
-            {
-                var fileVersion = new Version(binReader.ReadByte(), binReader.ReadByte());
-                reader.CloseChunk();
+            using GorgonBinaryReader binReader = reader.OpenChunk(VersionData);
+            var fileVersion = new Version(binReader.ReadByte(), binReader.ReadByte());
+            reader.CloseChunk();
 
-                return Version.Equals(fileVersion);
-            }
+            return Version.Equals(fileVersion);
         }
 
         /// <summary>

@@ -281,10 +281,8 @@ namespace Gorgon.IO
                 throw new ArgumentEmptyException(nameof(filePath));
             }
 
-            using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return FromStream(stream, overrideTexture, (int)stream.Length);
-            }
+            using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return FromStream(stream, overrideTexture, (int)stream.Length);
         }
 
         /// <summary>
@@ -345,10 +343,8 @@ namespace Gorgon.IO
                 throw new ArgumentEmptyException(nameof(filePath));
             }
 
-            using (FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                Save(sprite, stream);
-            }
+            using FileStream stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            Save(sprite, stream);
         }
 
         /// <summary>

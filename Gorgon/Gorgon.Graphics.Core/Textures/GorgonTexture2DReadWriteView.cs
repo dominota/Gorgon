@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
@@ -597,6 +598,7 @@ namespace Gorgon.Graphics.Core
         /// </para>
         /// </remarks>
         /// <seealso cref="GorgonTexture2D"/>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Texture ownership is transferred to the texture view, disposing it will break things.")]
         public static GorgonTexture2DReadWriteView CreateTexture(GorgonGraphics graphics, IGorgonTexture2DInfo info, IGorgonImage initialData = null)
         {
             if (graphics == null)
@@ -730,13 +732,11 @@ namespace Gorgon.Graphics.Core
                 throw new EndOfStreamException();
             }
 
-            using (IGorgonImage image = codec.LoadFromStream(stream, size))
-            {
-                GorgonTexture2D texture = image.ToTexture2D(graphics, options);
-                GorgonTexture2DReadWriteView view = texture.GetReadWriteView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromStream(stream, size);
+            GorgonTexture2D texture = image.ToTexture2D(graphics, options);
+            GorgonTexture2DReadWriteView view = texture.GetReadWriteView();
+            view.OwnsResource = true;
+            return view;
         }
 
         /// <summary>
@@ -803,13 +803,11 @@ namespace Gorgon.Graphics.Core
                 throw new ArgumentNullException(nameof(codec));
             }
 
-            using (IGorgonImage image = codec.LoadFromFile(filePath))
-            {
-                GorgonTexture2D texture = image.ToTexture2D(graphics, options);
-                GorgonTexture2DReadWriteView view = texture.GetReadWriteView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromFile(filePath);
+            GorgonTexture2D texture = image.ToTexture2D(graphics, options);
+            GorgonTexture2DReadWriteView view = texture.GetReadWriteView();
+            view.OwnsResource = true;
+            return view;
         }
         #endregion
 

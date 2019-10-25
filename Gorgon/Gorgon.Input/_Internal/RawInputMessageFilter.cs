@@ -202,46 +202,16 @@ namespace Gorgon.Native
                 }
 
                 // If we have no legacy messages turned on for the mouse, then do not process them.
-                switch (m.Msg)
+                return m.Msg switch
                 {
                     /*case WM_XBUTTONDBLCLK:
-					case WM_XBUTTONDOWN:
-					case WM_XBUTTONUP:
-					case WM_RBUTTONDBLCLK:
-					case WM_RBUTTONDOWN:*/
-                    case WM_RBUTTONUP:
-                        /*case WM_NCRBUTTONDBLCLK:
-                        case WM_NCRBUTTONDOWN:
-                        case WM_NCRBUTTONUP:
-                        case WM_NCXBUTTONDBLCLK:
-                        case WM_NCXBUTTONDOWN:
-                        case WM_NCXBUTTONUP:
-                        case WM_NCMOUSEHOVER:
-                        case WM_NCMOUSELEAVE:
-                        case WM_NCMOUSEMOVE:
-                        case WM_NCLBUTTONDBLCLK:
-                        case WM_NCLBUTTONDOWN:
-                        case WM_NCLBUTTONUP:
-                        case WM_NCMBUTTONDBLCLK:
-                        case WM_NCMBUTTONDOWN:
-                        case WM_NCMBUTTONUP:
-                        case WM_MOUSELEAVE:
-                        case WM_MOUSEMOVE:
-                        case WM_MOUSEWHEEL:
-                        case WM_MOUSEHWHEEL:
-                        case WM_MOUSEHOVER:
-                        case WM_MOUSEACTIVATE:
-                        case WM_LBUTTONDBLCLK:
-                        case WM_LBUTTONDOWN:
-                        case WM_LBUTTONUP:
-                        case WM_MBUTTONDBLCLK:
-                        case WM_MBUTTONDOWN:
-                        case WM_MBUTTONUP:
-                        case WM_CAPTURECHANGED:*/
-                        return true;
-                    default:
-                        return false;
-                }
+   case WM_XBUTTONDOWN:
+   case WM_XBUTTONUP:
+   case WM_RBUTTONDBLCLK:
+   case WM_RBUTTONDOWN:*/
+                    WM_RBUTTONUP => true,
+                    _ => false,
+                };
             }
 
             RAWINPUT data = RawInputApi.GetRawInputData(m.LParam);

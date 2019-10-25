@@ -152,10 +152,8 @@ namespace Gorgon.Graphics.Imaging.Codecs
                 throw new ArgumentEmptyException(nameof(filePath));
             }
 
-            using (FileStream fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return GetFrameDelays(fileStream);
-            }
+            using FileStream fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return GetFrameDelays(fileStream);
         }
 
         /// <summary>
@@ -203,6 +201,7 @@ namespace Gorgon.Graphics.Imaging.Codecs
             finally
             {
                 stream.Position = position;
+                wic.Dispose();
             }
         }
         #endregion

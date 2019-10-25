@@ -104,6 +104,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -1233,6 +1234,7 @@ namespace Gorgon.Graphics.Imaging.Codecs
             }
         }
 
+
         /// <summary>
         /// Function to decode an image from a stream.
         /// </summary>
@@ -1249,6 +1251,8 @@ namespace Gorgon.Graphics.Imaging.Codecs
         /// consumes more memory, it is necessary when handling streams that do not have seek capability (e.g. <see cref="System.Net.Sockets.NetworkStream"/>).
         /// </para>
         /// </remarks>
+        /// 
+        [SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "The reader object doesn't need to be disposed. Disposal does nothing.")]
         protected override IGorgonImage OnDecodeFromStream(Stream stream, long size)
         {
             uint[] palette = null;
@@ -1362,43 +1366,41 @@ namespace Gorgon.Graphics.Imaging.Codecs
             }
 
             // Use a binary writer.
-            using (var writer = new GorgonBinaryWriter(stream, true))
-            {
-                // Write the header for the file.
-                WriteHeader(imageData, writer, DdsLegacyFlags.None);
+            using var writer = new GorgonBinaryWriter(stream, true);
+            // Write the header for the file.
+            WriteHeader(imageData, writer, DdsLegacyFlags.None);
 
-                // Write image data.
-                switch (imageData.ImageType)
-                {
-                    case ImageType.Image1D:
-                    case ImageType.Image2D:
-                    case ImageType.ImageCube:
-                        for (int array = 0; array < imageData.ArrayCount; array++)
-                        {
-                            for (int mipLevel = 0; mipLevel < imageData.MipCount; mipLevel++)
-                            {
-                                IGorgonImageBuffer buffer = imageData.Buffers[mipLevel, array];
-                                writer.WriteRange(buffer.Data, count: buffer.PitchInformation.SlicePitch);
-                            }
-                        }
-                        break;
-                    case ImageType.Image3D:
-                        int depth = imageData.Depth;
+            // Write image data.
+            switch (imageData.ImageType)
+            {
+                case ImageType.Image1D:
+                case ImageType.Image2D:
+                case ImageType.ImageCube:
+                    for (int array = 0; array < imageData.ArrayCount; array++)
+                    {
                         for (int mipLevel = 0; mipLevel < imageData.MipCount; mipLevel++)
                         {
-                            for (int slice = 0; slice < depth; slice++)
-                            {
-                                IGorgonImageBuffer buffer = imageData.Buffers[mipLevel, slice];
-                                writer.WriteRange(buffer.Data, count: buffer.PitchInformation.SlicePitch);
-                            }
-
-                            if (depth > 1)
-                            {
-                                depth >>= 1;
-                            }
+                            IGorgonImageBuffer buffer = imageData.Buffers[mipLevel, array];
+                            writer.WriteRange(buffer.Data, count: buffer.PitchInformation.SlicePitch);
                         }
-                        break;
-                }
+                    }
+                    break;
+                case ImageType.Image3D:
+                    int depth = imageData.Depth;
+                    for (int mipLevel = 0; mipLevel < imageData.MipCount; mipLevel++)
+                    {
+                        for (int slice = 0; slice < depth; slice++)
+                        {
+                            IGorgonImageBuffer buffer = imageData.Buffers[mipLevel, slice];
+                            writer.WriteRange(buffer.Data, count: buffer.PitchInformation.SlicePitch);
+                        }
+
+                        if (depth > 1)
+                        {
+                            depth >>= 1;
+                        }
+                    }
+                    break;
             }
         }
 

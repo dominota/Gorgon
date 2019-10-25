@@ -71,21 +71,21 @@ namespace Gorgon.IO
                 return DX.RectangleF.Empty;
             }
 
-            var l = (float)(reader.ReadAsDouble() ?? 0);
+            float l = (float)(reader.ReadAsDouble() ?? 0);
 
             if (!reader.Read())
             {
                 return new DX.RectangleF(l, 0, 0, 0);
             }
 
-            var t = (float)(reader.ReadAsDouble() ?? 0);
+            float t = (float)(reader.ReadAsDouble() ?? 0);
 
             if (!reader.Read())
             {
                 return new DX.RectangleF(l, t, 0, 0);
             }
 
-            var r = (float)(reader.ReadAsDouble() ?? 0);
+            float r = (float)(reader.ReadAsDouble() ?? 0);
 
             if (!reader.Read())
             {
@@ -97,7 +97,7 @@ namespace Gorgon.IO
                 };
             }
 
-            var b = (float)(reader.ReadAsDouble() ?? 0);
+            float b = (float)(reader.ReadAsDouble() ?? 0);
 
             var result = new DX.RectangleF
             {

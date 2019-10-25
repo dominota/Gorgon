@@ -32,7 +32,7 @@ Gorgon is licensed under the [MIT license](http://opensource.org/licenses/MIT).
 How far along are you?  Is it done yet?  How about now?
 -------------------------------------------------------
 
-Gorgon 3.0 is now available.
+Gorgon 3.1 is in development.
 
 What can it do?
 ---------------
@@ -72,7 +72,7 @@ Gorgon provides a set of libraries that are capable of handling pretty much any 
   
   Functionality to read and write image formats. This also contains functionality to use a fluent interface to manipulate images for things like cropping, scaling, etc... 
   
-  Gorgon uses [codecs](https://github.com/Tape-Worm/Gorgon/blob/3.0/Gorgon/Gorgon.Graphics.Imaging/Codecs) to read/write images and includes codecs for the following formats:
+  Gorgon uses [codecs](https://github.com/Tape-Worm/Gorgon/blob/master/Gorgon/Gorgon.Graphics.Imaging/Codecs) to read/write images and includes codecs for the following formats:
    * __DDS__ - Direct Draw Surface
    * __TGA__ - Truevision Targa
    * __PNG__ - Portable Network Graphics
@@ -126,24 +126,24 @@ Gorgon provides a set of libraries that are capable of handling pretty much any 
 What's required?
 ----------------
 
-  * [.NET 4.7.2](https://www.microsoft.com/net/download/dotnet-framework-runtime)
-  * Windows 10 (Build 15063 or later).
+  * [.NET Core 3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0)
+  * Windows 10 1809 (Build 17763.253 or later).
   * Microsoft DirectX 11.4
 
 To compile the library
 ----------------------
 
-  * [Visual C# 2017](https://www.microsoft.com/en-us/store/b/visualstudio) [v15.8](https://docs.microsoft.com/en-us/visualstudio/releasenotes/vs2017-relnotes#whats-new-in-158) or later. 
+  * [Visual C# 2019](https://www.microsoft.com/en-us/store/b/visualstudio) [v16.3.6](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes#--visual-studio-2019-version-1636-) or later. 
 
 To use the library
 ------------------
 
-  * You may use any .NET 4.7.2 enabled language (e.g. Visual Basic .NET) to write an application with Gorgon.
+  * You may use any .NET Core 3.0 enabled language to write an application with Gorgon.
 
 Source code
 -----------
 
-The master branch contains the current release version of Gorgon 3.0.  
+The master branch contains the current release version of Gorgon 3.1.  
 
 Acknowledgements
 ================

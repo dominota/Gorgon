@@ -80,27 +80,25 @@ namespace Gorgon.Graphics.Example
                       };
 
             // Copy the above vertex/index data into a vertex and index buffer so we can render our plane.
-            using (var vertexPtr = GorgonNativeBuffer<BoingerVertex>.Pin(Vertices))
-            using (var indexPtr = GorgonNativeBuffer<ushort>.Pin(Indices))
-            {
-                VertexBufferBindings[0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
-                                                                                       new GorgonVertexBufferInfo("Plane Vertex Buffer")
-                                                                                       {
-                                                                                           SizeInBytes =
-                                                                                               Vertices.Length * BoingerVertex.Size,
-                                                                                           Usage = ResourceUsage.Immutable
-                                                                                       },
-                                                                                       vertexPtr);
+            using var vertexPtr = GorgonNativeBuffer<BoingerVertex>.Pin(Vertices);
+            using var indexPtr = GorgonNativeBuffer<ushort>.Pin(Indices);
+            VertexBufferBindings[0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
+new GorgonVertexBufferInfo("Plane Vertex Buffer")
+{
+SizeInBytes =
+Vertices.Length * BoingerVertex.Size,
+Usage = ResourceUsage.Immutable
+},
+vertexPtr);
 
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo("Plane Index Buffer")
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        IndexCount = Indices.Length,
-                                                        Use16BitIndices = true
-                                                    },
-                                                    indexPtr);
-            }
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo("Plane Index Buffer")
+                                                {
+                                                    Usage = ResourceUsage.Immutable,
+                                                    IndexCount = Indices.Length,
+                                                    Use16BitIndices = true
+                                                },
+                                                indexPtr);
         }
         #endregion
     }

@@ -34,7 +34,6 @@ using Gorgon.Examples.Properties;
 using Gorgon.Graphics;
 using Gorgon.Graphics.Core;
 using Gorgon.Graphics.Imaging.Codecs;
-using Gorgon.Math;
 using Gorgon.Renderers;
 using Gorgon.Timing;
 using Gorgon.UI;
@@ -343,6 +342,7 @@ namespace Gorgon.Examples
         {
             try
             {
+                Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 

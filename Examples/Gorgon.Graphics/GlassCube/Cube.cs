@@ -182,27 +182,25 @@ namespace Gorgon.Graphics.Example
             };
 
             // Create our index buffer and vertex buffer and populate with our cube data.
-            using (var indexPtr = GorgonNativeBuffer<ushort>.Pin(indices))
-            using (var vertexPtr = GorgonNativeBuffer<GlassCubeVertex>.Pin(vertices))
-            {
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo("GlassCube Index Buffer")
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        IndexCount = indices.Length,
-                                                        Use16BitIndices = true
-                                                    },
-                                                    indexPtr);
+            using var indexPtr = GorgonNativeBuffer<ushort>.Pin(indices);
+            using var vertexPtr = GorgonNativeBuffer<GlassCubeVertex>.Pin(vertices);
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+new GorgonIndexBufferInfo("GlassCube Index Buffer")
+{
+Usage = ResourceUsage.Immutable,
+IndexCount = indices.Length,
+Use16BitIndices = true
+},
+indexPtr);
 
-                VertexBuffer = new GorgonVertexBufferBindings(inputLayout)
-                {
-                    [0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
-                                                                                      vertices.Length,
-                                                                                      ResourceUsage.Immutable,
-                                                                                      initialData: vertexPtr,
-                                                                                      bufferName: "GlassCube Vertex Buffer")
-                };
-            }
+            VertexBuffer = new GorgonVertexBufferBindings(inputLayout)
+            {
+                [0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
+                                                                                  vertices.Length,
+                                                                                  ResourceUsage.Immutable,
+                                                                                  initialData: vertexPtr,
+                                                                                  bufferName: "GlassCube Vertex Buffer")
+            };
         }
         #endregion
     }

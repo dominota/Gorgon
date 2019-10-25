@@ -32,7 +32,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Gorgon\Gorgon.Core\Gorgon.Core.csproj" />
     <ProjectReference Include="..\..\Example004.csproj" />
   </ItemGroup>
 

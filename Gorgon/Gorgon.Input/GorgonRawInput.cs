@@ -136,17 +136,13 @@ namespace Gorgon.Input
             string className = RawInputDeviceRegistryInfo.GetDeviceClass(deviceName, _log);
             string deviceDescription = RawInputDeviceRegistryInfo.GetDeviceDescription(deviceName, _log);
 
-            switch (deviceInfo.dwType)
+            return deviceInfo.dwType switch
             {
-                case RawInputType.Keyboard:
-                    return new RawKeyboardInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.keyboard) as T;
-                case RawInputType.Mouse:
-                    return new RawMouseInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.mouse) as T;
-                case RawInputType.HID:
-                    return new GorgonRawHIDInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.hid) as T;
-                default:
-                    return null;
-            }
+                RawInputType.Keyboard => new RawKeyboardInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.keyboard) as T,
+                RawInputType.Mouse => new RawMouseInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.mouse) as T,
+                RawInputType.HID => new GorgonRawHIDInfo(device.Device, deviceName, className, deviceDescription, deviceInfo.hid) as T,
+                _ => null,
+            };
         }
 
         /// <summary>

@@ -237,7 +237,7 @@ namespace Gorgon.Diagnostics.LogProviders
                     ++end;
                     string dateTime = line.Substring(0, end);
 
-                    line = (line.Length - end) > 0 ? line.Substring(end, line.Length - end) : string.Empty;
+                    line = (line.Length - end) > 0 ? line[end..] : string.Empty;
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write(dateTime);

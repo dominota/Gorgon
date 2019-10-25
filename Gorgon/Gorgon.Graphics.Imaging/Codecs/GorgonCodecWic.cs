@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Gorgon.Core;
@@ -131,6 +132,7 @@ namespace Gorgon.Graphics.Imaging.Codecs
         /// <param name="size">The size of the image within the stream, in bytes.</param>
         /// <returns>A <see cref="IGorgonImage"/> containing the image data from the stream.</returns>
         /// <exception cref="GorgonException">Thrown when the image data in the stream has a pixel format that is unsupported.</exception>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Dispose does nothing for stream wrapper. SOLID issue for sure, blame Microsoft for the poor design.")]
         protected override IGorgonImage OnDecodeFromStream(Stream stream, long size)
         {
             var wic = new WicUtilities();
@@ -323,10 +325,8 @@ namespace Gorgon.Graphics.Imaging.Codecs
                 throw new ArgumentEmptyException(nameof(fileName));
             }
 
-            using (FileStream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return GetFrameOffsets(stream);
-            }
+            using FileStream stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return GetFrameOffsets(stream);
         }
 
         /// <summary>

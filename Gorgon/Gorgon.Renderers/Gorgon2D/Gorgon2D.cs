@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using Gorgon.Core;
@@ -218,7 +219,7 @@ namespace Gorgon.Renderers
         /// <seealso cref="DrawRectangle(DX.RectangleF, GorgonColor, float, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
         /// <seealso cref="DrawEllipse(DX.RectangleF, GorgonColor, float, float, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
         /// <seealso cref="DrawArc(DX.RectangleF, GorgonColor, float, float, float, float, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>        
-        /// <seealso cref="DrawTriangle(in GorgonTriangleVertex, in GorgonTriangleVertex, in GorgonTriangleVertex, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
+        /// <seealso cref="DrawTriangle(in GorgonTriangleVertex, in GorgonTriangleVertex, in GorgonTriangleVertex, GorgonTexture2DView, GorgonSamplerState, float)"/>
         /// <seealso cref="DrawFilledRectangle(DX.RectangleF, GorgonColor, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
         /// <seealso cref="DrawFilledEllipse(DX.RectangleF, GorgonColor, float, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
         /// <seealso cref="DrawFilledArc(DX.RectangleF, GorgonColor, float, float, float, GorgonTexture2DView, DX.RectangleF?, int, GorgonSamplerState, float)"/>
@@ -536,7 +537,7 @@ namespace Gorgon.Renderers
         /// <param name="renderable">The renderable to interrogate.</param>
         /// <returns>The bounds with transformation applied.</returns>
         /// <remarks>This is the equivalent of an axis aligned bounding box.</remarks>        
-        private DX.RectangleF GetTransformedBounds(BatchRenderable renderable)
+        private static DX.RectangleF GetTransformedBounds(BatchRenderable renderable)
         {
             float left = float.MaxValue;
             float top = float.MaxValue;
@@ -750,6 +751,7 @@ namespace Gorgon.Renderers
         /// <seealso cref="GorgonPolySprite"/>
         /// <seealso cref="GorgonPolySpriteVertex"/>
         /// <seealso cref="GorgonSprite"/>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public void DrawPolygonSprite(GorgonPolySprite sprite)
         {
             sprite.ValidateObject(nameof(sprite));
@@ -826,7 +828,9 @@ namespace Gorgon.Renderers
         /// </summary>
         /// <param name="sprite">The sprite to retrieve the boundaries from.</param>
         /// <returns>The bounds with transformation applied.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sprite"/> parameter is <b>null</b>.</exception>
         /// <remarks>This is the equivalent of an axis aligned bounding box.</remarks>        
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public DX.RectangleF MeasureSprite(GorgonSprite sprite)
         {
             sprite.ValidateObject(nameof(sprite));
@@ -850,6 +854,8 @@ namespace Gorgon.Renderers
         /// <param name="sprite">The sprite to retrieve the boundaries from.</param>
         /// <returns>The bounds with transformation applied.</returns>
         /// <remarks>This is the equivalent of an axis aligned bounding box.</remarks>        
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sprite"/> parameter is <b>null</b>.</exception>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public DX.RectangleF MeasureSprite(GorgonTextSprite sprite)
         {
             // The number of characters evaluated.
@@ -989,6 +995,8 @@ namespace Gorgon.Renderers
         /// <param name="sprite">The sprite to retrieve the boundaries from.</param>
         /// <returns>The bounds with transformation applied.</returns>
         /// <remarks>This is the equivalent of an axis aligned bounding box.</remarks>        
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sprite"/> parameter is <b>null</b>.</exception>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public DX.RectangleF MeasureSprite(GorgonPolySprite sprite)
         {
             if (_initialized != Initialized)
@@ -996,6 +1004,7 @@ namespace Gorgon.Renderers
                 Initialize();
             }
 
+            sprite.ValidateObject(nameof(sprite));
             if (sprite.IsUpdated)
             {
                 _polyTransformer.Transform(sprite.Renderable);
@@ -1019,6 +1028,7 @@ namespace Gorgon.Renderers
         /// </para>
         /// </remarks>
         /// <seealso cref="GorgonSprite"/>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public void DrawSprite(GorgonSprite sprite)
         {
             sprite.ValidateObject(nameof(sprite));
@@ -1047,17 +1057,21 @@ namespace Gorgon.Renderers
         /// </summary>
         /// <param name="sprite">The sprite to retrieve the AABB from.</param>
         /// <returns>A rectangle containing the axis aligned bounding box.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sprite"/> parameter is <b>null</b>.</exception>
         public DX.RectangleF GetAABB(GorgonSprite sprite)
         {
             GetAABB(sprite, out DX.RectangleF result);
             return result;
         }
 
+
         /// <summary>
         /// Function to retrieve the axis-aligned bounding box for a sprite.
         /// </summary>
         /// <param name="sprite">The sprite to retrieve the AABB from.</param>
         /// <param name="aabb">A rectangle containing the axis-aligned bounding box.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="sprite"/> parameter is <b>null</b>.</exception>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public void GetAABB(GorgonSprite sprite, out DX.RectangleF aabb)
         {
             if (_initialized == Uninitialized)
@@ -1070,6 +1084,7 @@ namespace Gorgon.Renderers
             float y1 = float.MaxValue;
             float y2 = float.MinValue;
 
+            sprite.ValidateObject(nameof(sprite));
             BatchRenderable renderable = sprite.Renderable;
 
             if (sprite.IsUpdated)
@@ -1156,6 +1171,7 @@ namespace Gorgon.Renderers
         /// </remarks>
         /// <seealso cref="GorgonTextSprite"/>
         /// <seealso cref="GorgonSprite"/>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Validated through custom validation extension.")]
         public void DrawTextSprite(GorgonTextSprite sprite)
         {
             sprite.ValidateObject(nameof(sprite));
@@ -1434,12 +1450,10 @@ namespace Gorgon.Renderers
         /// <param name="point2">The vertex for the second point in the triangle.</param>
         /// <param name="point3">The vertex for the third point in the triangle.</param>
         /// <param name="texture">[Optional] The texture for the rectangle.</param>
-        /// <param name="textureRegion">[Optional] The texture coordinates to map to the rectangle.</param>
-        /// <param name="textureArrayIndex">[Optional] The array index for a texture array to use.</param>
         /// <param name="textureSampler">[Optional] The texture sampler to apply to the texture.</param>
         /// <param name="depth">[Optional] The depth value for the rectangle.</param>
         /// <exception cref="InvalidOperationException">Thrown if this method was called without having called <see cref="Begin"/> first.</exception>
-        public void DrawTriangle(in GorgonTriangleVertex point1, in GorgonTriangleVertex point2, in GorgonTriangleVertex point3, GorgonTexture2DView texture = null, DX.RectangleF? textureRegion = null, int textureArrayIndex = 0, GorgonSamplerState textureSampler = null, float depth = 0)
+        public void DrawTriangle(in GorgonTriangleVertex point1, in GorgonTriangleVertex point2, in GorgonTriangleVertex point3, GorgonTexture2DView texture = null, GorgonSamplerState textureSampler = null, float depth = 0)
         {
 #if DEBUG
             if (_beginCalled == 0)
@@ -2465,14 +2479,12 @@ namespace Gorgon.Renderers
         /// <param name="point2">The vertex for the second point in the triangle.</param>
         /// <param name="point3">The vertex for the third point in the triangle.</param>
         /// <param name="texture">[Optional] The texture for the rectangle.</param>
-        /// <param name="textureRegion">[Optional] The texture coordinates to map to the rectangle.</param>
-        /// <param name="textureArrayIndex">[Optional] The array index for a texture array to use.</param>
         /// <param name="textureSampler">[Optional] The texture sampler to apply to the texture.</param>
         /// <param name="depth">[Optional] The depth value for the rectangle.</param>
         /// <exception cref="InvalidOperationException">Thrown if this method was called without having called <see cref="IGorgon2DFluent.Begin"/> first.</exception>
-        IGorgon2DDrawingFluent IGorgon2DDrawingFluent.DrawTriangle(in GorgonTriangleVertex point1, in GorgonTriangleVertex point2, in GorgonTriangleVertex point3, GorgonTexture2DView texture, DX.RectangleF? textureRegion, int textureArrayIndex, GorgonSamplerState textureSampler, float depth)
+        IGorgon2DDrawingFluent IGorgon2DDrawingFluent.DrawTriangle(in GorgonTriangleVertex point1, in GorgonTriangleVertex point2, in GorgonTriangleVertex point3, GorgonTexture2DView texture, GorgonSamplerState textureSampler, float depth)
         {
-            DrawTriangle(point1, point2, point3, texture, textureRegion, textureArrayIndex, textureSampler, depth);
+            DrawTriangle(point1, point2, point3, texture, textureSampler, depth);
             return this;
         }
 

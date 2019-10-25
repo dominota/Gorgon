@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
 using Gorgon.Graphics.Imaging;
@@ -599,6 +600,7 @@ namespace Gorgon.Graphics.Core
             Texture.Graphics.D3DDeviceContext.ClearView(Native, new DX.Color4(depthValue), _clearRects, rectangles.Length);
         }
 
+
         /// <summary>
         /// Function to create a new depth/stencil buffer that is bindable to the GPU.
         /// </summary>
@@ -623,6 +625,7 @@ namespace Gorgon.Graphics.Core
         /// </para> 
         /// </remarks>
         /// <seealso cref="GorgonTexture2D"/>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Texture ownership is transferred to the texture view, disposing it will break things.")]
         public static GorgonDepthStencil2DView CreateDepthStencil(GorgonGraphics graphics, IGorgonTexture2DInfo info, DepthStencilViewFlags viewFlags = DepthStencilViewFlags.None)
         {
             if (graphics == null)

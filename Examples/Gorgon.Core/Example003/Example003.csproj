@@ -45,7 +45,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Gorgon\Gorgon.Core\Gorgon.Core.csproj" />
     <ProjectReference Include="..\..\..\Gorgon\Gorgon.Windows\Gorgon.Windows.csproj" />
   </ItemGroup>
 

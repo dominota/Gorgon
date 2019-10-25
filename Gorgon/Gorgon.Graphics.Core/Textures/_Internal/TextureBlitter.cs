@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Gorgon.Graphics.Core;
 using Gorgon.Graphics.Core.Properties;
@@ -144,6 +145,7 @@ namespace Gorgon.Graphics
         /// <summary>
         /// Function to initialize the blitter.
         /// </summary>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "What???  Resources is a static construct built by the IDE.  Why would I dispose of it!?")]
         public void Initialize()
         {
             try

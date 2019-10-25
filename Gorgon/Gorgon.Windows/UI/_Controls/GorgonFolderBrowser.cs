@@ -1430,25 +1430,14 @@ namespace Gorgon.UI
                     Font = Font
                 };
 
-                switch (drive.DriveType)
+                item.ImageIndex = drive.DriveType switch
                 {
-                    case DriveType.Network:
-                        item.ImageIndex = 5;
-                        break;
-                    case DriveType.Ram:
-                        item.ImageIndex = 4;
-                        break;
-                    case DriveType.CDRom:
-                        item.ImageIndex = 3;
-                        break;
-                    case DriveType.Removable:
-                        item.ImageIndex = 2;
-                        break;
-                    default:
-                        item.ImageIndex = 1;
-                        break;
-                }
-
+                    DriveType.Network => 5,
+                    DriveType.Ram => 4,
+                    DriveType.CDRom => 3,
+                    DriveType.Removable => 2,
+                    _ => 1,
+                };
 
                 item.SubItems.Add($@"{drive.AvailableFreeSpace.FormatMemory()}");
 

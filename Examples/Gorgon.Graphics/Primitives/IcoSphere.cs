@@ -25,7 +25,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Drawing;
 using Gorgon.Graphics.Core;
 using Gorgon.Math;
 using Gorgon.Native;
@@ -371,31 +370,29 @@ namespace Gorgon.Examples
 
             FixSeam(vertexList, indexList);
 
-            using (var vertexData = GorgonNativeBuffer<Vertex3D>.Pin(vertexList.ToArray()))
-            using (var indexData = GorgonNativeBuffer<int>.Pin(indexList.ToArray()))
-            {
-                VertexCount = vertexList.Count;
-                IndexCount = indexList.Count;
-                TriangleCount = IndexCount / 3;
+            using var vertexData = GorgonNativeBuffer<Vertex3D>.Pin(vertexList.ToArray());
+            using var indexData = GorgonNativeBuffer<int>.Pin(indexList.ToArray());
+            VertexCount = vertexList.Count;
+            IndexCount = indexList.Count;
+            TriangleCount = IndexCount / 3;
 
-                CalculateTangents(vertexData, indexData);
+            CalculateTangents(vertexData, indexData);
 
-                VertexBuffer = new GorgonVertexBuffer(graphics,
-                                                      new GorgonVertexBufferInfo("IcoSphereVertexBuffer")
-                                                      {
-                                                          SizeInBytes = vertexData.SizeInBytes,
-                                                          Usage = ResourceUsage.Immutable
-                                                      },
-                                                      vertexData.Cast<byte>());
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        Use16BitIndices = false,
-                                                        IndexCount = IndexCount
-                                                    },
-                                                    indexData);
-            }
+            VertexBuffer = new GorgonVertexBuffer(graphics,
+                                                  new GorgonVertexBufferInfo("IcoSphereVertexBuffer")
+                                                  {
+                                                      SizeInBytes = vertexData.SizeInBytes,
+                                                      Usage = ResourceUsage.Immutable
+                                                  },
+                                                  vertexData.Cast<byte>());
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo
+                                                {
+                                                    Usage = ResourceUsage.Immutable,
+                                                    Use16BitIndices = false,
+                                                    IndexCount = IndexCount
+                                                },
+                                                indexData);
         }
 
         /// <summary>Function to retrieve the 2D axis aligned bounding box for the mesh.</summary>

@@ -274,7 +274,7 @@ namespace Gorgon.Graphics.Fonts
 
             _externalFonts.AddFontFile(path);
 
-            return _externalFonts.Families[_externalFonts.Families.Length - 1];
+            return _externalFonts.Families[^1];
         }
 
         /// <summary>

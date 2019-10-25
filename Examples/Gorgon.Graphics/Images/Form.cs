@@ -91,10 +91,8 @@ namespace Gorgon.Graphics.Example
                 // Begin our animation.
                 _gifAnim.Animate(() =>
                                  {
-                                     using (System.Drawing.Graphics graphics = CreateGraphics())
-                                     {
-                                         _gallery.RefreshGif(graphics);
-                                     }
+                                     using System.Drawing.Graphics graphics = CreateGraphics();
+                                     _gallery.RefreshGif(graphics);
                                  });
             }
             catch (Exception ex)

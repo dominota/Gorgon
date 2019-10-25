@@ -249,10 +249,8 @@ namespace Gorgon.Graphics.Core
                 throw new ArgumentEmptyException(nameof(path));
             }
 
-            using (FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                SaveToStream(stream);
-            }
+            using FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            SaveToStream(stream);
         }
 
         /// <summary>

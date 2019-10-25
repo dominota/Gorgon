@@ -393,15 +393,11 @@ namespace Gorgon.Graphics.Core
 
             if (Usage != ResourceUsage.Staging)
             {
-                switch (copyMode)
+                mapMode = copyMode switch
                 {
-                    case CopyMode.NoOverwrite:
-                        mapMode = D3D11.MapMode.WriteNoOverwrite;
-                        break;
-                    default:
-                        mapMode = D3D11.MapMode.WriteDiscard;
-                        break;
-                }
+                    CopyMode.NoOverwrite => D3D11.MapMode.WriteNoOverwrite,
+                    _ => D3D11.MapMode.WriteDiscard,
+                };
             }
 
             DX.DataBox mapData = Graphics.D3DDeviceContext.MapSubresource(Native, 0, mapMode, D3D11.MapFlags.None);

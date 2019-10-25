@@ -245,10 +245,8 @@ namespace Gorgon.IO
                 // Copy the file.
                 using (Stream sourceStream = file.OpenStream())
                 {
-                    using (Stream destStream = OpenStream(file.FullPath, FileMode.Create))
-                    {
-                        sourceStream.CopyTo(destStream, 80000);
-                    }
+                    using Stream destStream = OpenStream(file.FullPath, FileMode.Create);
+                    sourceStream.CopyTo(destStream, 80000);
                 }
 
                 ++fileCount;

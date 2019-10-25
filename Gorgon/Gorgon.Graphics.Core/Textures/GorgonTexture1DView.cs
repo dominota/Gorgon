@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
@@ -400,6 +401,7 @@ namespace Gorgon.Graphics.Core
         /// </para>
         /// </remarks>
         /// <seealso cref="GorgonTexture1D"/>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Texture ownership is transferred to the texture view, disposing it will break things.")]
         public static GorgonTexture1DView CreateTexture(GorgonGraphics graphics, IGorgonTexture1DInfo info, IGorgonImage initialData = null)
         {
             if (graphics == null)
@@ -529,13 +531,11 @@ namespace Gorgon.Graphics.Core
                 throw new EndOfStreamException();
             }
 
-            using (IGorgonImage image = codec.LoadFromStream(stream, size))
-            {
-                GorgonTexture1D texture = image.ToTexture1D(graphics, options);
-                GorgonTexture1DView view = texture.GetShaderResourceView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromStream(stream, size);
+            GorgonTexture1D texture = image.ToTexture1D(graphics, options);
+            GorgonTexture1DView view = texture.GetShaderResourceView();
+            view.OwnsResource = true;
+            return view;
         }
 
         /// <summary>
@@ -602,13 +602,11 @@ namespace Gorgon.Graphics.Core
                 throw new ArgumentNullException(nameof(codec));
             }
 
-            using (IGorgonImage image = codec.LoadFromFile(filePath))
-            {
-                GorgonTexture1D texture = image.ToTexture1D(graphics, options);
-                GorgonTexture1DView view = texture.GetShaderResourceView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromFile(filePath);
+            GorgonTexture1D texture = image.ToTexture1D(graphics, options);
+            GorgonTexture1DView view = texture.GetShaderResourceView();
+            view.OwnsResource = true;
+            return view;
         }
         #endregion
 

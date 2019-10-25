@@ -489,17 +489,13 @@ namespace Gorgon.Graphics.Fonts.Codecs
                 fileNameExtension = "." + fileNameExtension;
             }
 
-            switch (fileNameExtension.ToUpperInvariant())
+            return (fileNameExtension.ToUpperInvariant()) switch
             {
-                case ".DDS":
-                    return new GorgonCodecDds();
-                case ".PNG":
-                    return new GorgonCodecPng();
-                case ".TGA":
-                    return new GorgonCodecTga();
-                default:
-                    throw new GorgonException(GorgonResult.CannotRead, string.Format(Resources.GORGFX_ERR_FONT_TEXTURE_NOT_VALID, "*.dds\n*.png\n*.tga"));
-            }
+                ".DDS" => new GorgonCodecDds(),
+                ".PNG" => new GorgonCodecPng(),
+                ".TGA" => new GorgonCodecTga(),
+                _ => throw new GorgonException(GorgonResult.CannotRead, string.Format(Resources.GORGFX_ERR_FONT_TEXTURE_NOT_VALID, "*.dds\n*.png\n*.tga")),
+            };
         }
 
         /// <summary>
@@ -526,15 +522,12 @@ namespace Gorgon.Graphics.Fonts.Codecs
 
                 IGorgonImageCodec codec = GetImageCodec(fileInfo.Extension);
 
-                using (IGorgonImage image = codec.LoadFromFile(fileInfo.FullName))
-                {
-                    image.ToTexture2D(Factory.Graphics,
-                                      new GorgonTexture2DLoadOptions
-                                      {
-                                          Name = $"BmFont_Texture_{Guid.NewGuid():N}"
-                                      });
-
-                }
+                using IGorgonImage image = codec.LoadFromFile(fileInfo.FullName);
+                image.ToTexture2D(Factory.Graphics,
+new GorgonTexture2DLoadOptions
+{
+Name = $"BmFont_Texture_{Guid.NewGuid():N}"
+});
             }
 
             return textures;
@@ -594,16 +587,14 @@ namespace Gorgon.Graphics.Fonts.Codecs
         /// </returns>
         protected override IGorgonFontInfo OnGetMetaData(Stream stream)
         {
-            using (var reader = new StreamReader(stream, Encoding.ASCII, true, 80000, true))
-            {
-                BmFontInfo result = ParseInfoLine(reader.ReadLine());
-                ParseCommonLine(result, reader.ReadLine());
-                ParseTextures(result, reader);
-                ParseCharacters(result, reader);
-                ParseKerning(result, reader);
+            using var reader = new StreamReader(stream, Encoding.ASCII, true, 80000, true);
+            BmFontInfo result = ParseInfoLine(reader.ReadLine());
+            ParseCommonLine(result, reader.ReadLine());
+            ParseTextures(result, reader);
+            ParseCharacters(result, reader);
+            ParseKerning(result, reader);
 
-                return result;
-            }
+            return result;
         }
 
         /// <summary>

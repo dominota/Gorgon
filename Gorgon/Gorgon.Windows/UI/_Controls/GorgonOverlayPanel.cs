@@ -442,32 +442,30 @@ namespace Gorgon.UI
                 parentForm.ActiveControl = this;
             }
 
-            using (var backingImage = new Bitmap(Parent.Width, Parent.Height))
+            using var backingImage = new Bitmap(Parent.Width, Parent.Height);
+            IEnumerable<Control> siblings = (from sibling in Parent.Controls.Cast<Control>()
+                                             where (sibling.Enabled) && (sibling.Visible)
+                                             let siblingZ = Parent.Controls.GetChildIndex(sibling)
+                                             where (siblingZ > zIndex) && (sibling.Bounds.IntersectsWith(Bounds))
+                                             orderby siblingZ descending
+                                             select sibling);
+
+            foreach (Control control in siblings)
             {
-                IEnumerable<Control> siblings = (from sibling in Parent.Controls.Cast<Control>()
-                                                 where (sibling.Enabled) && (sibling.Visible)
-                                                 let siblingZ = Parent.Controls.GetChildIndex(sibling)
-                                                 where (siblingZ > zIndex) && (sibling.Bounds.IntersectsWith(Bounds))
-                                                 orderby siblingZ descending
-                                                 select sibling);
-
-                foreach (Control control in siblings)
-                {
-                    control.Refresh();
-                    control.DrawToBitmap(backingImage, control.Bounds);
-                }
-
-                int alphaValue = (int)(_opacity / 100.0 * 255.0);
-
-                e.Graphics.DrawImage(backingImage, -Left, -Top);
-                using (var alphaBrush = new SolidBrush(Color.FromArgb(alphaValue, _overlayColor)))
-                {
-                    e.Graphics.FillRectangle(alphaBrush, ClientRectangle);
-                }
-
-                // Function called when the siblings for this control are painted.
-                OnOverlayPainted(e);
+                control.Refresh();
+                control.DrawToBitmap(backingImage, control.Bounds);
             }
+
+            int alphaValue = (int)(_opacity / 100.0 * 255.0);
+
+            e.Graphics.DrawImage(backingImage, -Left, -Top);
+            using (var alphaBrush = new SolidBrush(Color.FromArgb(alphaValue, _overlayColor)))
+            {
+                e.Graphics.FillRectangle(alphaBrush, ClientRectangle);
+            }
+
+            // Function called when the siblings for this control are painted.
+            OnOverlayPainted(e);
         }
         #endregion
 

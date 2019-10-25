@@ -331,10 +331,8 @@ namespace Gorgon.Graphics.Core
                 throw new ArgumentEmptyException(nameof(path));
             }
 
-            using (FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return FromStream<T>(graphics, stream, (int)stream.Length);
-            }
+            using FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return FromStream<T>(graphics, stream, (int)stream.Length);
         }
 
         /// <summary>

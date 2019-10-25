@@ -1416,15 +1416,11 @@ namespace Gorgon.Graphics.Core
 
                 if (Usage == ResourceUsage.Dynamic)
                 {
-                    switch (copyMode)
+                    mapMode = copyMode switch
                     {
-                        case CopyMode.NoOverwrite:
-                            mapMode = D3D11.MapMode.WriteNoOverwrite;
-                            break;
-                        default:
-                            mapMode = D3D11.MapMode.WriteDiscard;
-                            break;
-                    }
+                        CopyMode.NoOverwrite => D3D11.MapMode.WriteNoOverwrite,
+                        _ => D3D11.MapMode.WriteDiscard,
+                    };
                 }
 
                 // Otherwise we will map and write the data.
@@ -2156,15 +2152,13 @@ namespace Gorgon.Graphics.Core
                 options.Name = GenerateName(NamePrefix);
             }
 
-            using (IGorgonImage image = codec.LoadFromStream(stream, size))
+            using IGorgonImage image = codec.LoadFromStream(stream, size);
+            if (options.ConvertToPremultipliedAlpha)
             {
-                if (options.ConvertToPremultipliedAlpha)
-                {
-                    image.ConvertToPremultipliedAlpha();
-                }
-
-                return new GorgonTexture2D(graphics, image, options);
+                image.ConvertToPremultipliedAlpha();
             }
+
+            return new GorgonTexture2D(graphics, image, options);
         }
 
         /// <summary>
@@ -2236,15 +2230,13 @@ namespace Gorgon.Graphics.Core
                 options.Name = GenerateName(NamePrefix);
             }
 
-            using (IGorgonImage image = codec.LoadFromFile(filePath))
+            using IGorgonImage image = codec.LoadFromFile(filePath);
+            if (options.ConvertToPremultipliedAlpha)
             {
-                if (options.ConvertToPremultipliedAlpha)
-                {
-                    image.ConvertToPremultipliedAlpha();
-                }
-
-                return new GorgonTexture2D(graphics, image, options);
+                image.ConvertToPremultipliedAlpha();
             }
+
+            return new GorgonTexture2D(graphics, image, options);
         }
 
         /// <summary>

@@ -144,3 +144,9 @@ csharp_space_between_square_brackets = false
 csharp_preserve_single_line_blocks = false
 csharp_preserve_single_line_statements = false
 
+
+# IDE0063: Use simple 'using' statement
+csharp_prefer_simple_using_statement = true:warning
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none

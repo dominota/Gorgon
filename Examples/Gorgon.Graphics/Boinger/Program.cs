@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -269,7 +270,7 @@ namespace Gorgon.Graphics.Example
 
             // Now we flip our buffers.
             // We need to this or we won't see anything.
-            _swap.Present(1);
+            _swap.Present();
 
             return true;
         }
@@ -300,6 +301,7 @@ namespace Gorgon.Graphics.Example
             _wvpBuffer.Buffer.SetData(ref wvp);
         }
 
+
         /// <summary>
         /// Function to create the primary graphics interface.
         /// </summary>
@@ -310,6 +312,7 @@ namespace Gorgon.Graphics.Example
         /// device, it will indicate that by returning <b>null</b>.
         /// </para>
         /// </remarks>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "This returns the instance of the object being created, disposing it would crash the application.")]
         private static GorgonGraphics CreateGraphicsInterface()
         {
             GorgonGraphics graphics = null;
@@ -543,7 +546,7 @@ namespace Gorgon.Graphics.Example
                 _mainForm = GorgonExample.Initialize(new DX.Size2(Settings.Default.Resolution.Width, Settings.Default.Resolution.Height), "Boinger");
 
                 // Add a keybinding to switch to full screen or windowed.
-                _mainForm.KeyDown += _mainForm_KeyDown;
+                _mainForm.KeyDown += MainForm_KeyDown;
 
                 // Set up the swap chain, buffers, and texture(s).
                 InitializeGpuResources();
@@ -613,7 +616,7 @@ namespace Gorgon.Graphics.Example
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="KeyEventArgs" /> instance containing the event data.</param>
         /// <exception cref="NotSupportedException"></exception>
-        private static void _mainForm_KeyDown(object sender, KeyEventArgs e)
+        private static void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             if ((!e.Alt) || (e.KeyCode != Keys.Enter))
             {
@@ -667,6 +670,7 @@ namespace Gorgon.Graphics.Example
         [STAThread]
         private static void Main()
         {
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

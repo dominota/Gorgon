@@ -859,10 +859,8 @@ namespace Gorgon.Graphics.Imaging
                 return destFormat.ToArray();
             }
 
-            using (var wic = new WicUtilities())
-            {
-                return wic.CanConvertFormats(sourceFormat, destFormat);
-            }
+            using var wic = new WicUtilities();
+            return wic.CanConvertFormats(sourceFormat, destFormat);
         }
     }
 }

@@ -1126,10 +1126,8 @@ namespace Gorgon.Graphics.Core
         /// <seealso cref="IGorgonImage"/>
         public IGorgonImage CopyBackBufferToImage()
         {
-            using (GorgonTexture2D texture = CopyBackBufferToTexture(ResourceUsage.Staging, TextureBinding.None))
-            {
-                return texture.ToImage();
-            }
+            using GorgonTexture2D texture = CopyBackBufferToTexture(ResourceUsage.Staging, TextureBinding.None);
+            return texture.ToImage();
         }
 
         /// <summary>

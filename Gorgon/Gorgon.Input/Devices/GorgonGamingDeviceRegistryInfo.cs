@@ -105,22 +105,18 @@ namespace Gorgon.Input
             // between operating systems.
             const string regKeyPath = @"System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick\OEM\";
 
-            using (RegistryKey joystickOemKey = Registry.CurrentUser.OpenSubKey(regKeyPath, false))
+            using RegistryKey joystickOemKey = Registry.CurrentUser.OpenSubKey(regKeyPath, false);
+            string joystickDeviceKeyName = joystickOemKey?.GetSubKeyNames().First(item => parts[1].StartsWith(item, StringComparison.OrdinalIgnoreCase));
+
+            if (string.IsNullOrWhiteSpace(joystickDeviceKeyName))
             {
-                string joystickDeviceKeyName = joystickOemKey?.GetSubKeyNames().First(item => parts[1].StartsWith(item, StringComparison.OrdinalIgnoreCase));
-
-                if (string.IsNullOrWhiteSpace(joystickDeviceKeyName))
-                {
-                    return string.Empty;
-                }
-
-                using (RegistryKey joystickVidKey = joystickOemKey.OpenSubKey(subKeyName, false))
-                {
-                    object value = joystickVidKey?.GetValue("OEMName");
-
-                    return value?.ToString() ?? string.Empty;
-                }
+                return string.Empty;
             }
+
+            using RegistryKey joystickVidKey = joystickOemKey.OpenSubKey(subKeyName, false);
+            object value = joystickVidKey?.GetValue("OEMName");
+
+            return value?.ToString() ?? string.Empty;
         }
 
         /// <summary>

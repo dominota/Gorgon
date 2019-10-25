@@ -46,10 +46,8 @@ namespace Gorgon.Graphics.Example
     /// 
     /// But, when we resize the window we lose our cube! Why does this happen? Well, in order to resize the swap chain back buffers the swap chain must be removed from the graphics 
     /// pipeline (that is, unset) as our active render target. Gorgon will happily do this for us by disposing of the render target view and render target texture from the swap chain when 
-    /// resizing. However, it will not remember that the view/texture were assigned as the current render target (we could do this, but it causes complications in more complex scenarios 
-    /// like multi-monitor rendering). So, to counter this, a swap chain has a Before/After swap chain resized event that we can hook into. In the after resize event, we just merely 
-    /// reassign the swap chain as the render target in the draw call. We also must resize the view port and the projection matrix to match our window (and assign it to the draw call), or 
-    /// else things will not render in the correct position or size within the window.
+    /// resizing. However, our projection matrix will no longer be correct. So, to counter this, a swap chain has a Before/After swap chain resized event that we can hook into. In the 
+    /// after resize event, we just merely reassign the projection matrix to match our window.
     /// </summary>
     internal static class Program
     {
@@ -61,6 +59,7 @@ namespace Gorgon.Graphics.Example
         {
             try
             {
+                Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 

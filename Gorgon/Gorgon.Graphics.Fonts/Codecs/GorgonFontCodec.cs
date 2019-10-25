@@ -439,10 +439,8 @@ namespace Gorgon.Graphics.Fonts.Codecs
                 throw new ArgumentEmptyException(nameof(filePath));
             }
 
-            using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return OnLoadFromStream(name, stream);
-            }
+            using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return OnLoadFromStream(name, stream);
         }
 
         /// <summary>

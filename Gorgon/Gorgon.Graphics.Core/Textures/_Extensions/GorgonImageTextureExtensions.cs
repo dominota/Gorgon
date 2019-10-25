@@ -103,15 +103,13 @@ namespace Gorgon.Graphics.Core
                 options.Name = GorgonGraphicsResource.GenerateName(GorgonTexture2D.NamePrefix);
             }
 
-            using (IGorgonImage image = gdiBitmap.ToGorgonImage())
+            using IGorgonImage image = gdiBitmap.ToGorgonImage();
+            if (options.ConvertToPremultipliedAlpha)
             {
-                if (options.ConvertToPremultipliedAlpha)
-                {
-                    image.ConvertToPremultipliedAlpha();
-                }
-
-                return new GorgonTexture2D(graphics, image, options);
+                image.ConvertToPremultipliedAlpha();
             }
+
+            return new GorgonTexture2D(graphics, image, options);
         }
 
         /// <summary>

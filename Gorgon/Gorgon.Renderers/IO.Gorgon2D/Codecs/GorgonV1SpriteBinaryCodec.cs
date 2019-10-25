@@ -430,32 +430,30 @@ namespace Gorgon.IO
         /// <returns><b>true</b> if the data can be read, or <b>false</b> if not.</returns>
         protected override bool OnIsReadable(Stream stream)
         {
-            using (var reader = new GorgonBinaryReader(stream, true))
+            using var reader = new GorgonBinaryReader(stream, true);
+            // If we don't have at least 10 bytes, then this file is not valid.
+            if ((stream.Length - stream.Position) < 16)
             {
-                // If we don't have at least 10 bytes, then this file is not valid.
-                if ((stream.Length - stream.Position) < 16)
-                {
-                    return false;
-                }
+                return false;
+            }
 
-                string headerVersion = reader.ReadString();
-                if ((!headerVersion.StartsWith("GORSPR", StringComparison.OrdinalIgnoreCase))
-                    || (headerVersion.Length < 7)
-                    || (headerVersion.Length > 9))
-                {
-                    return false;
-                }
+            string headerVersion = reader.ReadString();
+            if ((!headerVersion.StartsWith("GORSPR", StringComparison.OrdinalIgnoreCase))
+                || (headerVersion.Length < 7)
+                || (headerVersion.Length > 9))
+            {
+                return false;
+            }
 
-                // Get the version information.
-                switch (headerVersion.ToUpperInvariant())
-                {
-                    case "GORSPR1":
-                    case "GORSPR1.1":
-                    case "GORSPR1.2":
-                        return true;
-                    default:
-                        return false;
-                }
+            // Get the version information.
+            switch (headerVersion.ToUpperInvariant())
+            {
+                case "GORSPR1":
+                case "GORSPR1.1":
+                case "GORSPR1.2":
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -466,39 +464,37 @@ namespace Gorgon.IO
         /// <returns>The name of the texture associated with the sprite, or <b>null</b> if no texture was found.</returns>
         protected override string OnGetAssociatedTextureName(Stream stream)
         {
-            using (var reader = new GorgonBinaryReader(stream, true))
+            using var reader = new GorgonBinaryReader(stream, true);
+            string headerVersion = reader.ReadString();
+            if ((!headerVersion.StartsWith("GORSPR", StringComparison.OrdinalIgnoreCase))
+                || (headerVersion.Length < 7)
+                || (headerVersion.Length > 9))
             {
-                string headerVersion = reader.ReadString();
-                if ((!headerVersion.StartsWith("GORSPR", StringComparison.OrdinalIgnoreCase))
-                    || (headerVersion.Length < 7)
-                    || (headerVersion.Length > 9))
-                {
-                    return null;
-                }
-
-                // Get the version information.
-                switch (headerVersion.ToUpperInvariant())
-                {
-                    case "GORSPR1":
-                    case "GORSPR1.1":
-                    case "GORSPR1.2":
-                        break;
-                    default:
-                        return null;
-                }
-
-                // We don't need the sprite name.
-                reader.ReadString();
-
-                // Find out if we have an image.
-                if (!reader.ReadBoolean())
-                {
-                    return null;
-                }
-
-                reader.ReadBoolean();
-                return reader.ReadString();
+                return null;
             }
+
+            // Get the version information.
+            switch (headerVersion.ToUpperInvariant())
+            {
+                case "GORSPR1":
+                case "GORSPR1.1":
+                case "GORSPR1.2":
+                    break;
+                default:
+                    return null;
+            }
+
+            // We don't need the sprite name.
+            reader.ReadString();
+
+            // Find out if we have an image.
+            if (!reader.ReadBoolean())
+            {
+                return null;
+            }
+
+            reader.ReadBoolean();
+            return reader.ReadString();
         }
 
         /// <summary>
@@ -510,11 +506,9 @@ namespace Gorgon.IO
         /// <returns>A new <see cref="GorgonSprite"/>.</returns>
         protected override GorgonSprite OnReadFromStream(Stream stream, int byteCount, GorgonTexture2DView overrideTexture)
         {
-            using (var reader = new GorgonBinaryReader(stream, true))
-            {
-                // We don't need the byte count here.
-                return LoadSprite(Graphics, reader, overrideTexture);
-            }
+            using var reader = new GorgonBinaryReader(stream, true);
+            // We don't need the byte count here.
+            return LoadSprite(Graphics, reader, overrideTexture);
         }
 
         /// <summary>

@@ -110,43 +110,41 @@ namespace Gorgon.Examples
                 // Here we load the image from the file system.
                 // Note that we don't care if it's from the zip file
                 // or the folder.  It's all the same to us.
-                using (Stream fileStream = file.OpenStream())
+                using Stream fileStream = file.OpenStream();
+                // If it's a picture, then load it.
+                switch (file.Extension.ToLower())
                 {
-                    // If it's a picture, then load it.
-                    switch (file.Extension.ToLower())
-                    {
-                        case ".jpg":
-                        case ".jpeg":
-                        case ".bmp":
-                        case ".png":
-                            if (_image != null)
-                            {
-                                _image.Dispose();
-                                _image = null;
-                            }
+                    case ".jpg":
+                    case ".jpeg":
+                    case ".bmp":
+                    case ".png":
+                        if (_image != null)
+                        {
+                            _image.Dispose();
+                            _image = null;
+                        }
 
-                            _image = Image.FromStream(fileStream);
-                            _picture.Image = _image;
-                            _picture.SizeMode = PictureBoxSizeMode.Zoom;
+                        _image = Image.FromStream(fileStream);
+                        _picture.Image = _image;
+                        _picture.SizeMode = PictureBoxSizeMode.Zoom;
 
-                            // Add to control.
-                            splitFileSystem.Panel2.Controls.Add(_picture);
-                            _picture.Dock = DockStyle.Fill;
-                            break;
-                        default:
-                            // Get data in the file stream.
-                            byte[] textData = new byte[fileStream.Length];
-                            fileStream.Read(textData, 0, textData.Length);
+                        // Add to control.
+                        splitFileSystem.Panel2.Controls.Add(_picture);
+                        _picture.Dock = DockStyle.Fill;
+                        break;
+                    default:
+                        // Get data in the file stream.
+                        byte[] textData = new byte[fileStream.Length];
+                        fileStream.Read(textData, 0, textData.Length);
 
-                            // Convert to a string.
-                            _textDisplay.Text = Encoding.UTF8.GetString(textData);
-                            _textDisplay.Multiline = true;
-                            _textDisplay.ReadOnly = true;
-                            _textDisplay.ScrollBars = ScrollBars.Both;
-                            _textDisplay.Dock = DockStyle.Fill;
-                            splitFileSystem.Panel2.Controls.Add(_textDisplay);
-                            break;
-                    }
+                        // Convert to a string.
+                        _textDisplay.Text = Encoding.UTF8.GetString(textData);
+                        _textDisplay.Multiline = true;
+                        _textDisplay.ReadOnly = true;
+                        _textDisplay.ScrollBars = ScrollBars.Both;
+                        _textDisplay.Dock = DockStyle.Fill;
+                        splitFileSystem.Panel2.Controls.Add(_textDisplay);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -214,16 +212,14 @@ namespace Gorgon.Examples
             // We can load the objects we need and discard the plugin system after.
             // This works because we keep the references to the objects that our 
             // plugin creates, even after the plugin is gone.
-            using (var pluginAssemblies = new GorgonMefPlugInCache(Program.Log))
-            {
-                pluginAssemblies.LoadPlugInAssemblies(Program.PlugInPath, "Gorgon.FileSystem.Zip.DLL");
+            using var pluginAssemblies = new GorgonMefPlugInCache(Program.Log);
+            pluginAssemblies.LoadPlugInAssemblies(Program.PlugInPath, "Gorgon.FileSystem.Zip.DLL");
 
-                var providerFactory = new GorgonFileSystemProviderFactory(
-                    new GorgonMefPlugInService(pluginAssemblies),
-                    Program.Log);
+            var providerFactory = new GorgonFileSystemProviderFactory(
+                new GorgonMefPlugInService(pluginAssemblies),
+                Program.Log);
 
-                _fileSystem = new GorgonFileSystem(providerFactory.CreateProvider(zipProviderPlugInName), Program.Log);
-            }
+            _fileSystem = new GorgonFileSystem(providerFactory.CreateProvider(zipProviderPlugInName), Program.Log);
         }
 
         /// <summary>

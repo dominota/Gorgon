@@ -305,8 +305,6 @@ namespace Gorgon.Renderers
         /// <param name="point2">The vertex for the second point in the triangle.</param>
         /// <param name="point3">The vertex for the third point in the triangle.</param>
         /// <param name="texture">[Optional] The texture for the rectangle.</param>
-        /// <param name="textureRegion">[Optional] The texture coordinates to map to the rectangle.</param>
-        /// <param name="textureArrayIndex">[Optional] The array index for a texture array to use.</param>
         /// <param name="textureSampler">[Optional] The texture sampler to apply to the texture.</param>
         /// <param name="depth">[Optional] The depth value for the rectangle.</param>
         /// <returns>The fluent interface for drawing.</returns>
@@ -314,8 +312,6 @@ namespace Gorgon.Renderers
                                             in GorgonTriangleVertex point2,
                                             in GorgonTriangleVertex point3,
                                             GorgonTexture2DView texture = null,
-                                            DX.RectangleF? textureRegion = null,
-                                            int textureArrayIndex = 0,
                                             GorgonSamplerState textureSampler = null,
                                             float depth = 0);
 

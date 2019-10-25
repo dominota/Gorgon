@@ -83,33 +83,20 @@ namespace Gorgon.Graphics.Core
         /// <param name="filterType">The type of filter to apply.</param>
         /// <param name="comparisonType">The type of string comparer to use.</param>
         /// <returns><b>true</b> if the resource name matches the filter type, or <b>false</b> if not.</returns>
-        private static bool NameComparison(string name, string itemName, LocateFilterType filterType, StringComparison comparisonType)
-        {
-            if (string.IsNullOrWhiteSpace(itemName))
-            {
-                return false;
-            }
-
-            switch (filterType)
-            {
-                case LocateFilterType.StartsWith:
-                    return itemName.StartsWith(name, comparisonType);
-                case LocateFilterType.EndsWith:
-                    return itemName.EndsWith(name, comparisonType);
-                case LocateFilterType.Contains:
-                    return itemName.IndexOf(name, comparisonType) != -1;
-                case LocateFilterType.NotContains:
-                    return itemName.IndexOf(name, comparisonType) == -1;
-                case LocateFilterType.NotStartsWith:
-                    return !itemName.StartsWith(name, comparisonType);
-                case LocateFilterType.NotEndsWith:
-                    return !itemName.EndsWith(name, comparisonType);
-                case LocateFilterType.NotEqual:
-                    return !string.Equals(name, itemName, comparisonType);
-                default:
-                    return string.Equals(name, itemName, comparisonType);
-            }
-        }
+        private static bool NameComparison(string name, string itemName, LocateFilterType filterType, StringComparison comparisonType) 
+            => string.IsNullOrWhiteSpace(itemName)
+                ? false
+                : (filterType switch
+                {
+                    LocateFilterType.StartsWith => itemName.StartsWith(name, comparisonType),
+                    LocateFilterType.EndsWith => itemName.EndsWith(name, comparisonType),
+                    LocateFilterType.Contains => itemName.IndexOf(name, comparisonType) != -1,
+                    LocateFilterType.NotContains => itemName.IndexOf(name, comparisonType) == -1,
+                    LocateFilterType.NotStartsWith => !itemName.StartsWith(name, comparisonType),
+                    LocateFilterType.NotEndsWith => !itemName.EndsWith(name, comparisonType),
+                    LocateFilterType.NotEqual => !string.Equals(name, itemName, comparisonType),
+                    _ => string.Equals(name, itemName, comparisonType),
+                });
 
         /// <summary>
         /// Function to locate a graphics resource by its name.

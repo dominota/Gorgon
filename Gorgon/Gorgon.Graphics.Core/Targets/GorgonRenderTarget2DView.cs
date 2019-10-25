@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
 using Gorgon.Graphics.Core.Properties;
@@ -487,6 +488,7 @@ namespace Gorgon.Graphics.Core
         /// </para>
         /// </remarks>
         /// <seealso cref="GorgonTexture2D"/>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Texture ownership is transferred to the texture view, disposing it will break things.")]
         public static GorgonRenderTarget2DView CreateRenderTarget(GorgonGraphics graphics, IGorgonTexture2DInfo info, int arrayIndex = 0, int? arrayCount = null)
         {
             if (graphics == null)

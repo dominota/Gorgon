@@ -125,24 +125,22 @@ namespace Gorgon.Graphics.Example
             }
 
             // Copy the above vertex/index data into a vertex and index buffer so we can render our sphere.
-            using (var indexPtr = GorgonNativeBuffer<ushort>.Pin(Indices))
-            using (var vertexPtr = GorgonNativeBuffer<BoingerVertex>.Pin(Vertices))
-            {
-                VertexBufferBindings[0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
-                                                                                       new GorgonVertexBufferInfo("Sphere Vertex Buffer")
-                                                                                       {
-                                                                                           SizeInBytes = Vertices.Length * BoingerVertex.Size,
-                                                                                           Usage = ResourceUsage.Immutable
-                                                                                       },
-                                                                                       vertexPtr);
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo("Sphere Index Buffer")
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        IndexCount = Indices.Length
-                                                    },
-                                                    indexPtr);
-            }
+            using var indexPtr = GorgonNativeBuffer<ushort>.Pin(Indices);
+            using var vertexPtr = GorgonNativeBuffer<BoingerVertex>.Pin(Vertices);
+            VertexBufferBindings[0] = GorgonVertexBufferBinding.CreateVertexBuffer(graphics,
+new GorgonVertexBufferInfo("Sphere Vertex Buffer")
+{
+SizeInBytes = Vertices.Length * BoingerVertex.Size,
+Usage = ResourceUsage.Immutable
+},
+vertexPtr);
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo("Sphere Index Buffer")
+                                                {
+                                                    Usage = ResourceUsage.Immutable,
+                                                    IndexCount = Indices.Length
+                                                },
+                                                indexPtr);
         }
         #endregion
     }

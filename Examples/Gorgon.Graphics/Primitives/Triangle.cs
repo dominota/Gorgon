@@ -53,33 +53,31 @@ namespace Gorgon.Examples
             point2.Tangent = new DX.Vector4(1.0f, 0, 0, 1.0f);
             point3.Tangent = new DX.Vector4(1.0f, 0, 0, 1.0f);
 
-            using (var points = new GorgonNativeBuffer<Vertex3D>(3))
-            using (var indices = new GorgonNativeBuffer<int>(3))
-            {
-                points[0] = point1;
-                points[1] = point2;
-                points[2] = point3;
-                indices[0] = 0;
-                indices[1] = 1;
-                indices[2] = 2;
+            using var points = new GorgonNativeBuffer<Vertex3D>(3);
+            using var indices = new GorgonNativeBuffer<int>(3);
+            points[0] = point1;
+            points[1] = point2;
+            points[2] = point3;
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
 
-                VertexBuffer = new GorgonVertexBuffer(graphics,
-                                                      new GorgonVertexBufferInfo("TriVB")
-                                                      {
-                                                          Usage = ResourceUsage.Immutable,
-                                                          SizeInBytes = Vertex3D.Size * 3
-                                                      },
-                                                      points.Cast<byte>());
+            VertexBuffer = new GorgonVertexBuffer(graphics,
+                                                  new GorgonVertexBufferInfo("TriVB")
+                                                  {
+                                                      Usage = ResourceUsage.Immutable,
+                                                      SizeInBytes = Vertex3D.Size * 3
+                                                  },
+                                                  points.Cast<byte>());
 
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo("TriIB")
-                                                    {
-                                                        Usage = ResourceUsage.Dynamic,
-                                                        Use16BitIndices = false,
-                                                        IndexCount = 3
-                                                    },
-                                                    indices);
-            }
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo("TriIB")
+                                                {
+                                                    Usage = ResourceUsage.Dynamic,
+                                                    Use16BitIndices = false,
+                                                    IndexCount = 3
+                                                },
+                                                indices);
         }
         #endregion
     }

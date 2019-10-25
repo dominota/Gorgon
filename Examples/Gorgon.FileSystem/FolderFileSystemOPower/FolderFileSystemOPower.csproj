@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <ApplicationIcon>Gorgon2.ico</ApplicationIcon>
+    <ApplicationManifest>..\..\app.manifest</ApplicationManifest>
+    <Version>3.1.0</Version>
+    <Authors>Michael Winsor</Authors>
+    <Company>Tape_Worm</Company>
+    <Product>Gorgon</Product>
+    <Description>Example showing how to use the virtual file system.  This was a version 1.x example, converted to version 3.x of Gorgon.</Description>
+    <Copyright>(C)opyright 2019 Michael Winsor</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://www.tape-worm.net</PackageProjectUrl>
+    <PackageTags>Graphics 2D .NET C# SharpDX</PackageTags>
+    <RepositoryUrl>https://github.com/Tape-Worm/Gorgon</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageReleaseNotes>Initial .NET Core version.</PackageReleaseNotes>
+    <PackageIconUrl>https://www.tape-worm.net/favicon.ico</PackageIconUrl>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Gorgon.Examples</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\app.manifest" Link="app.manifest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Gorgon\Gorgon.Renderers\IO.Gorgon2D\Gorgon.IO.Gorgon2D.csproj" />
+    <ProjectReference Include="..\..\ExamplesCommon\ExamplesCommon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

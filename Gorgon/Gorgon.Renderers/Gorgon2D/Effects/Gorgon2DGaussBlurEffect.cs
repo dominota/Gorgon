@@ -260,11 +260,11 @@ namespace Gorgon.Renderers
             _blurRtvInfo.Width = _renderTargetSize.Width;
             _blurRtvInfo.Height = _renderTargetSize.Height;
 
-            _hPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, clearOnRetrieve: false);
+            _hPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, $"Gorgon2DGuassBlurEffect_HBlurRtv", clearOnRetrieve: false);
 
             _hPassView = _hPass.GetShaderResourceView();
 
-            _vPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, clearOnRetrieve: false);
+            _vPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, "Gorgon2DGuassBlurEffect_VBlurRtv", clearOnRetrieve: false);
             _vPassView = _vPass.GetShaderResourceView();
         }
 

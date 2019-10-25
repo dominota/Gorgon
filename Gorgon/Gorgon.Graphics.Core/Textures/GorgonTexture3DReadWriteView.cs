@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Gorgon.Core;
 using Gorgon.Diagnostics;
@@ -448,6 +449,7 @@ namespace Gorgon.Graphics.Core
         /// </para>
         /// </remarks>
         /// <seealso cref="GorgonTexture3D"/>
+        [SuppressMessage("Code Quality", "IDE0068:Use recommended dispose pattern", Justification = "Texture ownership is transferred to the texture view, disposing it will break things.")]
         public static GorgonTexture3DReadWriteView CreateTexture(GorgonGraphics graphics, IGorgonTexture3DInfo info, IGorgonImage initialData = null)
         {
             if (graphics == null)
@@ -585,13 +587,11 @@ namespace Gorgon.Graphics.Core
                 throw new EndOfStreamException();
             }
 
-            using (IGorgonImage image = codec.LoadFromStream(stream, size))
-            {
-                GorgonTexture3D texture = image.ToTexture3D(graphics, options);
-                GorgonTexture3DReadWriteView view = texture.GetReadWriteView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromStream(stream, size);
+            GorgonTexture3D texture = image.ToTexture3D(graphics, options);
+            GorgonTexture3DReadWriteView view = texture.GetReadWriteView();
+            view.OwnsResource = true;
+            return view;
         }
 
         /// <summary>
@@ -658,13 +658,11 @@ namespace Gorgon.Graphics.Core
                 throw new ArgumentNullException(nameof(codec));
             }
 
-            using (IGorgonImage image = codec.LoadFromFile(filePath))
-            {
-                GorgonTexture3D texture = image.ToTexture3D(graphics, options);
-                GorgonTexture3DReadWriteView view = texture.GetReadWriteView();
-                view.OwnsResource = true;
-                return view;
-            }
+            using IGorgonImage image = codec.LoadFromFile(filePath);
+            GorgonTexture3D texture = image.ToTexture3D(graphics, options);
+            GorgonTexture3DReadWriteView view = texture.GetReadWriteView();
+            view.OwnsResource = true;
+            return view;
         }
         #endregion
 

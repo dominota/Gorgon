@@ -451,14 +451,12 @@ namespace Gorgon.Graphics.Imaging
                 sourceFormat = BufferFormat.B8G8R8A8_UNorm;
             }
 
-            using (var wic = new WicUtilities())
-            {
-                return wic.CanConvertFormats(sourceFormat,
-                                             new[]
-                                             {
+            using var wic = new WicUtilities();
+            return wic.CanConvertFormats(sourceFormat,
+new[]
+{
                                                  format
-                                             }).Count > 0;
-            }
+}).Count > 0;
         }
 
         /// <summary>
@@ -477,10 +475,8 @@ namespace Gorgon.Graphics.Imaging
             // If we're converting from B4G4R4A4, then we need to use another path.
             if (_imageInfo.Format == BufferFormat.B4G4R4A4_UNorm)
             {
-                using (var wic = new WicUtilities())
-                {
-                    return wic.CanConvertFormats(BufferFormat.B8G8R8A8_UNorm, destFormats);
-                }
+                using var wic = new WicUtilities();
+                return wic.CanConvertFormats(BufferFormat.B8G8R8A8_UNorm, destFormats);
             }
 
             using (var wic = new WicUtilities())

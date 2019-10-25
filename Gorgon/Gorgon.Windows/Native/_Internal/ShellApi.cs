@@ -200,7 +200,7 @@ namespace Gorgon.Native
         /// <returns>The Icon if found, or <b>null</b> if not.</returns>
         public static Icon ExtractShellIcon(StandardShellIcons icon)
         {
-            IntPtr Get48x48Icon(int iImage)
+            static IntPtr Get48x48Icon(int iImage)
             {
                 IntPtr hIcon = IntPtr.Zero;
                 IImageList imageList = null;
@@ -221,10 +221,8 @@ namespace Gorgon.Native
                 return null;
             }
 
-            using (var iconFromShell = Icon.FromHandle(handle))
-            {
-                return (Icon)iconFromShell.Clone();
-            }
+            using var iconFromShell = Icon.FromHandle(handle);
+            return (Icon)iconFromShell.Clone();
         }
         #endregion
 

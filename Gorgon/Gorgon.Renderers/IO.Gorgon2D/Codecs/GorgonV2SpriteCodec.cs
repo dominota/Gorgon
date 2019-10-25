@@ -434,20 +434,18 @@ namespace Gorgon.IO
         /// <returns><b>true</b> if the data can be read, or <b>false</b> if not.</returns>
         protected override bool OnIsReadable(Stream stream)
         {
-            using (var reader = new GorgonBinaryReader(stream, true))
+            using var reader = new GorgonBinaryReader(stream, true);
+            if ((stream.Length - stream.Position) < sizeof(ulong) * 2)
             {
-                if ((stream.Length - stream.Position) < sizeof(ulong) * 2)
-                {
-                    return false;
-                }
-
-                ulong chunkHeader = reader.ReadUInt64();
-                // Skip the size, we don't need it.
-                reader.ReadUInt32();
-                ulong chunkFileData = reader.ReadUInt64();
-
-                return (chunkHeader == FileHeader.ChunkID()) && (chunkFileData == SpriteDataChunk.ChunkID());
+                return false;
             }
+
+            ulong chunkHeader = reader.ReadUInt64();
+            // Skip the size, we don't need it.
+            reader.ReadUInt32();
+            ulong chunkFileData = reader.ReadUInt64();
+
+            return (chunkHeader == FileHeader.ChunkID()) && (chunkFileData == SpriteDataChunk.ChunkID());
         }
 
         /// <summary>
@@ -457,32 +455,30 @@ namespace Gorgon.IO
         /// <returns>The name of the texture associated with the sprite, or <b>null</b> if no texture was found.</returns>
         protected override string OnGetAssociatedTextureName(Stream stream)
         {
-            using (var reader = new GorgonChunkReader(stream))
+            using var reader = new GorgonChunkReader(stream);
+            if (!reader.HasChunk(FileHeader))
             {
-                if (!reader.HasChunk(FileHeader))
-                {
-                    throw new GorgonException(GorgonResult.CannotRead, Resources.GOR2DIO_ERR_INVALID_HEADER);
-                }
-
-                reader.Begin(FileHeader);
-                reader.Begin(SpriteDataChunk);
-                reader.SkipBytes(DX.Vector2.SizeInBytes
-                                 + Unsafe.SizeOf<DX.Size2F>()
-                                 + (sizeof(bool) * 2)
-                                 + (GorgonColor.SizeInBytes * 4)
-                                 + (DX.Vector2.SizeInBytes * 4));
-                reader.End();
-
-                // Read rendering information.
-                reader.Begin(RenderDataChunk);
-                reader.SkipBytes(Unsafe.SizeOf<CullingMode>() + Unsafe.SizeOf<GorgonRangeF>() + 91);
-                reader.End();
-
-                // Read texture information.
-                reader.Begin(TextureDataChunk);
-                reader.SkipBytes(GorgonColor.SizeInBytes + (sizeof(int) * 2) + Unsafe.SizeOf<TextureFilter>());
-                return reader.ReadString();
+                throw new GorgonException(GorgonResult.CannotRead, Resources.GOR2DIO_ERR_INVALID_HEADER);
             }
+
+            reader.Begin(FileHeader);
+            reader.Begin(SpriteDataChunk);
+            reader.SkipBytes(DX.Vector2.SizeInBytes
+                             + Unsafe.SizeOf<DX.Size2F>()
+                             + (sizeof(bool) * 2)
+                             + (GorgonColor.SizeInBytes * 4)
+                             + (DX.Vector2.SizeInBytes * 4));
+            reader.End();
+
+            // Read rendering information.
+            reader.Begin(RenderDataChunk);
+            reader.SkipBytes(Unsafe.SizeOf<CullingMode>() + Unsafe.SizeOf<GorgonRangeF>() + 91);
+            reader.End();
+
+            // Read texture information.
+            reader.Begin(TextureDataChunk);
+            reader.SkipBytes(GorgonColor.SizeInBytes + (sizeof(int) * 2) + Unsafe.SizeOf<TextureFilter>());
+            return reader.ReadString();
         }
 
         /// <summary>

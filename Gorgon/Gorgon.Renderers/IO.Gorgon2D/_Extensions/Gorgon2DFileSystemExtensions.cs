@@ -396,14 +396,12 @@ namespace Gorgon.IO.Extensions
                     // ReSharper disable once InvertIf
                     if ((!loaded) && (textureFile != null) && (codec != null))
                     {
-                        using (Stream textureStream = textureFile.OpenStream())
-                        {
-                            textureForSprite = GorgonTexture2DView.FromStream(renderer.Graphics,
-                                                                              textureStream,
-                                                                              codec,
-                                                                              textureFile.Size,
-                                                                              GetTextureOptions(textureFile.FullPath, textureOptions));
-                        }
+                        using Stream textureStream = textureFile.OpenStream();
+                        textureForSprite = GorgonTexture2DView.FromStream(renderer.Graphics,
+textureStream,
+codec,
+textureFile.Size,
+GetTextureOptions(textureFile.FullPath, textureOptions));
                     }
 
                 }
@@ -556,14 +554,12 @@ namespace Gorgon.IO.Extensions
                     // ReSharper disable once InvertIf
                     if ((!loaded) && (textureFile != null) && (codec != null))
                     {
-                        using (Stream textureStream = textureFile.OpenStream())
-                        {
-                            textureForSprite = GorgonTexture2DView.FromStream(renderer.Graphics,
-                                                                              textureStream,
-                                                                              codec,
-                                                                              textureFile.Size,
-                                                                              GetTextureOptions(textureFile.FullPath, textureOptions));
-                        }
+                        using Stream textureStream = textureFile.OpenStream();
+                        textureForSprite = GorgonTexture2DView.FromStream(renderer.Graphics,
+textureStream,
+codec,
+textureFile.Size,
+GetTextureOptions(textureFile.FullPath, textureOptions));
                     }
 
                 }
@@ -727,13 +723,11 @@ namespace Gorgon.IO.Extensions
                     // ReSharper disable once InvertIf
                     if ((!loaded) && (textureFile != null) && (codec != null))
                     {
-                        using (Stream textureStream = textureFile.OpenStream())
-                        {
-                            textureKey.Value = GorgonTexture2DView.FromStream(renderer.Graphics,
-                                                                              textureStream,
-                                                                              codec,
-                                                                              textureFile.Size, GetTextureOptions(textureFile.FullPath, textureOptions));
-                        }
+                        using Stream textureStream = textureFile.OpenStream();
+                        textureKey.Value = GorgonTexture2DView.FromStream(renderer.Graphics,
+textureStream,
+codec,
+textureFile.Size, GetTextureOptions(textureFile.FullPath, textureOptions));
                     }
 
                     if ((needsCoordinateFix) && (textureKey.Value != null))

@@ -43,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Gorgon\Gorgon.Core\Gorgon.Core.csproj" />
     <ProjectReference Include="..\..\..\Gorgon\Gorgon.Input\Gorgon.Input.csproj" />
     <ProjectReference Include="..\..\ExamplesCommon\ExamplesCommon.csproj" />
   </ItemGroup>

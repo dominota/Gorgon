@@ -34,27 +34,23 @@ namespace Gorgon.Security
                 return _ivKey;
             }
 
-            using (var stream = new MemoryStream(keyData))
+            using var stream = new MemoryStream(keyData);
+            using var reader = new BinaryReader(stream, Encoding.Default, false);
+            int ivLength = reader.ReadInt32();
+            int keyLength = reader.ReadInt32();
+
+            byte[] iv = new byte[ivLength];
+            byte[] key = new byte[keyLength];
+
+            if ((iv.Length == 0) || (key.Length == 0))
             {
-                using (var reader = new BinaryReader(stream, Encoding.Default, false))
-                {
-                    int ivLength = reader.ReadInt32();
-                    int keyLength = reader.ReadInt32();
-
-                    byte[] iv = new byte[ivLength];
-                    byte[] key = new byte[keyLength];
-
-                    if ((iv.Length == 0) || (key.Length == 0))
-                    {
-                        throw new ArgumentException(Resources.GOR_ERR_ENCRYPTION_KEY_NOT_VALID, nameof(keyData));
-                    }
-
-                    reader.Read(iv, 0, iv.Length);
-                    reader.Read(key, 0, key.Length);
-
-                    return (iv, key);
-                }
+                throw new ArgumentException(Resources.GOR_ERR_ENCRYPTION_KEY_NOT_VALID, nameof(keyData));
             }
+
+            reader.Read(iv, 0, iv.Length);
+            reader.Read(key, 0, key.Length);
+
+            return (iv, key);
         }
 
         /// <summary>
@@ -76,20 +72,18 @@ namespace Gorgon.Security
                 return Array.Empty<byte>();
             }
 
-            using (var aes = new AesManaged())
-            using (ICryptoTransform transform = aes.CreateDecryptor(_ivKey.Key, _ivKey.IV))
-            using (var stream = new MemoryStream())
-            using (var writer = new CryptoStream(stream, transform, CryptoStreamMode.Write))
+            using var aes = new AesManaged();
+            using ICryptoTransform transform = aes.CreateDecryptor(_ivKey.Key, _ivKey.IV);
+            using var stream = new MemoryStream();
+            using var writer = new CryptoStream(stream, transform, CryptoStreamMode.Write);
+            writer.Write(data, 0, data.Length);
+
+            if (!writer.HasFlushedFinalBlock)
             {
-                writer.Write(data, 0, data.Length);
-
-                if (!writer.HasFlushedFinalBlock)
-                {
-                    writer.FlushFinalBlock();
-                }
-
-                return stream.ToArray();
+                writer.FlushFinalBlock();
             }
+
+            return stream.ToArray();
         }
 
         /// <summary>
@@ -111,16 +105,14 @@ namespace Gorgon.Security
                 return Array.Empty<byte>();
             }
 
-            using (var aes = new AesManaged())
-            using (ICryptoTransform transform = aes.CreateEncryptor(_ivKey.Key, _ivKey.IV))
-            using (var stream = new MemoryStream())
-            using (var writer = new CryptoStream(stream, transform, CryptoStreamMode.Write))
-            {
-                writer.Write(data, 0, data.Length);
-                writer.FlushFinalBlock();
+            using var aes = new AesManaged();
+            using ICryptoTransform transform = aes.CreateEncryptor(_ivKey.Key, _ivKey.IV);
+            using var stream = new MemoryStream();
+            using var writer = new CryptoStream(stream, transform, CryptoStreamMode.Write);
+            writer.Write(data, 0, data.Length);
+            writer.FlushFinalBlock();
 
-                return stream.ToArray();
-            }
+            return stream.ToArray();
         }
 
         /// <summary>
@@ -210,22 +202,16 @@ namespace Gorgon.Security
         /// </remarks>
 	    public static (byte[] IV, byte[] Key) GenerateIvKey(string password, byte[] salt = null)
         {
-            using (var rndGen = RandomNumberGenerator.Create())
+            using var rndGen = RandomNumberGenerator.Create();
+            if (salt == null)
             {
-                if (salt == null)
-                {
-                    salt = new byte[32];
-                    rndGen.GetBytes(salt);
-                }
-
-                using (var aes = new AesManaged())
-                {
-                    using (var hashGen = new Rfc2898DeriveBytes(password, salt, 100, HashAlgorithmName.SHA512))
-                    {
-                        return (hashGen.GetBytes(aes.BlockSize / 8), hashGen.GetBytes(aes.KeySize / 8));
-                    }
-                }
+                salt = new byte[32];
+                rndGen.GetBytes(salt);
             }
+
+            using var aes = new AesManaged();
+            using var hashGen = new Rfc2898DeriveBytes(password, salt, 100, HashAlgorithmName.SHA512);
+            return (hashGen.GetBytes(aes.BlockSize / 8), hashGen.GetBytes(aes.KeySize / 8));
         }
         #endregion
 

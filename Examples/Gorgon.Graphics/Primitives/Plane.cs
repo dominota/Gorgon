@@ -134,31 +134,29 @@ namespace Gorgon.Examples
             DX.Quaternion.RotationYawPitchRoll(angle.Y.ToRadians(), angle.X.ToRadians(), angle.Z.ToRadians(), out DX.Quaternion orientation);
             DX.Matrix.RotationQuaternion(ref orientation, out _orientation);
 
-            using (var vertexData = new GorgonNativeBuffer<Vertex3D>(VertexCount))
-            using (var indexData = new GorgonNativeBuffer<int>(IndexCount))
-            {
-                GetVertices(vertexData, size, textureCoordinates, columns, rows);
-                GetIndices(indexData, columns, rows);
+            using var vertexData = new GorgonNativeBuffer<Vertex3D>(VertexCount);
+            using var indexData = new GorgonNativeBuffer<int>(IndexCount);
+            GetVertices(vertexData, size, textureCoordinates, columns, rows);
+            GetIndices(indexData, columns, rows);
 
-                CalculateTangents(vertexData, indexData);
+            CalculateTangents(vertexData, indexData);
 
-                VertexBuffer = new GorgonVertexBuffer(graphics,
-                                                      new GorgonVertexBufferInfo("PlaneVB")
-                                                      {
-                                                          Usage = ResourceUsage.Immutable,
-                                                          SizeInBytes = vertexData.SizeInBytes
-                                                      },
-                                                      vertexData.Cast<byte>());
+            VertexBuffer = new GorgonVertexBuffer(graphics,
+                                                  new GorgonVertexBufferInfo("PlaneVB")
+                                                  {
+                                                      Usage = ResourceUsage.Immutable,
+                                                      SizeInBytes = vertexData.SizeInBytes
+                                                  },
+                                                  vertexData.Cast<byte>());
 
-                IndexBuffer = new GorgonIndexBuffer(graphics,
-                                                    new GorgonIndexBufferInfo
-                                                    {
-                                                        Usage = ResourceUsage.Immutable,
-                                                        Use16BitIndices = false,
-                                                        IndexCount = IndexCount
-                                                    },
-                                                    indexData);
-            }
+            IndexBuffer = new GorgonIndexBuffer(graphics,
+                                                new GorgonIndexBufferInfo
+                                                {
+                                                    Usage = ResourceUsage.Immutable,
+                                                    Use16BitIndices = false,
+                                                    IndexCount = IndexCount
+                                                },
+                                                indexData);
         }
         #endregion
     }

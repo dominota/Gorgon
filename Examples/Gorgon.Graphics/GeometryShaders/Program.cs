@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
 using Gorgon.Examples;
 using Gorgon.Graphics.Core;
@@ -326,6 +325,7 @@ namespace Gorgon.Graphics.Example
         {
             try
             {
+                Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 

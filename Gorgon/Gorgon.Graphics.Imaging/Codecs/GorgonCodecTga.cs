@@ -104,6 +104,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Gorgon.Core;
@@ -826,23 +827,21 @@ namespace Gorgon.Graphics.Imaging.Codecs
                 throw new EndOfStreamException();
             }
 
-            using (var reader = new GorgonBinaryReader(stream, true))
+            using var reader = new GorgonBinaryReader(stream, true);
+            IGorgonImageInfo info = ReadHeader(reader, out TGAConversionFlags flags);
+
+            IGorgonImage image = new GorgonImage(info);
+
+            if (DecodingOptions?.SetZeroAlphaAsOpaque ?? true)
             {
-                IGorgonImageInfo info = ReadHeader(reader, out TGAConversionFlags flags);
-
-                IGorgonImage image = new GorgonImage(info);
-
-                if (DecodingOptions?.SetZeroAlphaAsOpaque ?? true)
-                {
-                    flags |= TGAConversionFlags.SetOpaqueAlpha;
-                }
-
-                CopyImageData(reader, image, flags);
-
-                stream.Position = size;
-
-                return image;
+                flags |= TGAConversionFlags.SetOpaqueAlpha;
             }
+
+            CopyImageData(reader, image, flags);
+
+            stream.Position = size;
+
+            return image;
         }
 
         /// <summary>
@@ -868,75 +867,73 @@ namespace Gorgon.Graphics.Imaging.Codecs
                 throw new NotSupportedException(string.Format(Resources.GORIMG_ERR_FORMAT_NOT_SUPPORTED, imageData.Format));
             }
 
-            using (var writer = new GorgonBinaryWriter(stream, true))
+            using var writer = new GorgonBinaryWriter(stream, true);
+            // Write the header for the file before we dump the file contents.
+            TgaHeader header = GetHeader(imageData, out TGAConversionFlags conversionFlags);
+
+            GorgonPitchLayout destPitch;
+
+            if ((conversionFlags & TGAConversionFlags.RGB888) == TGAConversionFlags.RGB888)
             {
-                // Write the header for the file before we dump the file contents.
-                TgaHeader header = GetHeader(imageData, out TGAConversionFlags conversionFlags);
+                destPitch = new GorgonPitchLayout(imageData.Width * 3, imageData.Width * 3 * imageData.Height);
+            }
+            else
+            {
+                var formatInfo = new GorgonFormatInfo(imageData.Format);
+                destPitch = formatInfo.GetPitchForFormat(imageData.Width, imageData.Height);
+            }
 
-                GorgonPitchLayout destPitch;
+            GorgonPitchLayout srcPitch = imageData.Buffers[0].PitchInformation;
 
-                if ((conversionFlags & TGAConversionFlags.RGB888) == TGAConversionFlags.RGB888)
+            // If the two pitches are equal and we have no conversion requirements, then just write out the buffer.
+            if ((destPitch == srcPitch) && (conversionFlags == TGAConversionFlags.None))
+            {
+                writer.WriteValue(ref header);
+                writer.WriteRange(imageData.Buffers[0].Data, count: srcPitch.SlicePitch);
+                return;
+            }
+
+            unsafe
+            {
+                // Get the pointer to the first mip/array/depth level.
+                byte* srcPointer = (byte*)imageData.Buffers[0].Data;
+                var lineBuffer = new GorgonNativeBuffer<byte>(srcPitch.RowPitch);
+
+                try
                 {
-                    destPitch = new GorgonPitchLayout(imageData.Width * 3, imageData.Width * 3 * imageData.Height);
-                }
-                else
-                {
-                    var formatInfo = new GorgonFormatInfo(imageData.Format);
-                    destPitch = formatInfo.GetPitchForFormat(imageData.Width, imageData.Height);
-                }
-
-                GorgonPitchLayout srcPitch = imageData.Buffers[0].PitchInformation;
-
-                // If the two pitches are equal and we have no conversion requirements, then just write out the buffer.
-                if ((destPitch == srcPitch) && (conversionFlags == TGAConversionFlags.None))
-                {
+                    // Persist the working buffer to the stream.
                     writer.WriteValue(ref header);
-                    writer.WriteRange(imageData.Buffers[0].Data, count: srcPitch.SlicePitch);
-                    return;
-                }
 
-                unsafe
-                {
-                    // Get the pointer to the first mip/array/depth level.
-                    byte* srcPointer = (byte*)imageData.Buffers[0].Data;
-                    var lineBuffer = new GorgonNativeBuffer<byte>(srcPitch.RowPitch);
-
-                    try
+                    // Write out each scan line.					
+                    for (int y = 0; y < imageData.Height; y++)
                     {
-                        // Persist the working buffer to the stream.
-                        writer.WriteValue(ref header);
+                        byte* destPtr = (byte*)lineBuffer;
 
-                        // Write out each scan line.					
-                        for (int y = 0; y < imageData.Height; y++)
+                        if ((conversionFlags & TGAConversionFlags.RGB888) == TGAConversionFlags.RGB888)
                         {
-                            byte* destPtr = (byte*)lineBuffer;
-
-                            if ((conversionFlags & TGAConversionFlags.RGB888) == TGAConversionFlags.RGB888)
-                            {
-                                ImageUtilities.Compress24BPPScanLine(srcPointer,
-                                                                     srcPitch.RowPitch,
-                                                                     destPtr,
-                                                                     destPitch.RowPitch,
-                                                                     (conversionFlags & TGAConversionFlags.Swizzle) == TGAConversionFlags.Swizzle);
-                            }
-                            else if ((conversionFlags & TGAConversionFlags.Swizzle) == TGAConversionFlags.Swizzle)
-                            {
-                                ImageUtilities.SwizzleScanline(srcPointer, srcPitch.RowPitch, destPtr, destPitch.RowPitch, imageData.Format, ImageBitFlags.None);
-                            }
-                            else
-                            {
-                                ImageUtilities.CopyScanline(srcPointer, srcPitch.RowPitch, destPtr, destPitch.RowPitch, imageData.Format, ImageBitFlags.None);
-                            }
-
-                            srcPointer += srcPitch.RowPitch;
-
-                            writer.WriteRange(lineBuffer, count: destPitch.RowPitch);
+                            ImageUtilities.Compress24BPPScanLine(srcPointer,
+                                                                 srcPitch.RowPitch,
+                                                                 destPtr,
+                                                                 destPitch.RowPitch,
+                                                                 (conversionFlags & TGAConversionFlags.Swizzle) == TGAConversionFlags.Swizzle);
                         }
+                        else if ((conversionFlags & TGAConversionFlags.Swizzle) == TGAConversionFlags.Swizzle)
+                        {
+                            ImageUtilities.SwizzleScanline(srcPointer, srcPitch.RowPitch, destPtr, destPitch.RowPitch, imageData.Format, ImageBitFlags.None);
+                        }
+                        else
+                        {
+                            ImageUtilities.CopyScanline(srcPointer, srcPitch.RowPitch, destPtr, destPitch.RowPitch, imageData.Format, ImageBitFlags.None);
+                        }
+
+                        srcPointer += srcPitch.RowPitch;
+
+                        writer.WriteRange(lineBuffer, count: destPitch.RowPitch);
                     }
-                    finally
-                    {
-                        lineBuffer?.Dispose();
-                    }
+                }
+                finally
+                {
+                    lineBuffer?.Dispose();
                 }
             }
         }
@@ -1009,6 +1006,7 @@ namespace Gorgon.Graphics.Imaging.Codecs
         /// <returns><b>true</b> if the codec can read the file, <b>false</b> if not.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="stream"/> parameter is <b>null</b>.</exception>
         /// <exception cref="IOException">Thrown when the <paramref name="stream"/> is write-only or if the stream cannot perform seek operations.</exception>
+        [SuppressMessage("Code Quality", "IDE0067:Dispose objects before losing scope", Justification = "The reader object doesn't need to be disposed. Disposal does nothing.")]
         public override bool IsReadable(Stream stream)
         {
             TgaHeader header;
@@ -1034,15 +1032,18 @@ namespace Gorgon.Graphics.Imaging.Codecs
                 return false;
             }
 
+            GorgonBinaryReader reader = null;
+
             try
             {
                 position = stream.Position;
-                var reader = new GorgonBinaryReader(stream, true);
+                reader = new GorgonBinaryReader(stream, true);
                 header = reader.ReadValue<TgaHeader>();
             }
             finally
             {
-                stream.Position = position;
+                reader?.Dispose();
+                stream.Position = position;                
             }
 
             if ((header.ColorMapType != 0) || (header.ColorMapLength != 0))

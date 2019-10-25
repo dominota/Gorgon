@@ -1896,24 +1896,19 @@ namespace Gorgon.Graphics.Core
             {
                 resultFactory = factory2.QueryInterface<Factory5>();
 
-                using (Adapter adapter = (adapterInfo.VideoDeviceType == VideoDeviceType.Hardware
+                using Adapter adapter = (adapterInfo.VideoDeviceType == VideoDeviceType.Hardware
                                               ? resultFactory.GetAdapter1(adapterInfo.Index)
-                                              : resultFactory.GetWarpAdapter()))
+                                              : resultFactory.GetWarpAdapter());
+                resultAdapter = adapter.QueryInterface<Adapter4>();
+
+                using var device = new D3D11.Device(resultAdapter, flags, requestedFeatureLevel)
                 {
-                    resultAdapter = adapter.QueryInterface<Adapter4>();
+                    DebugName = $"'{adapterInfo.Name}' D3D11.4 {(adapterInfo.VideoDeviceType == VideoDeviceType.Software ? "Software Adapter" : "Adapter")}"
+                };
+                resultDevice = device.QueryInterface<D3D11.Device5>();
 
-                    using (var device = new D3D11.Device(resultAdapter, flags, requestedFeatureLevel)
-                    {
-                        DebugName =
-                                                         $"'{adapterInfo.Name}' D3D11.4 {(adapterInfo.VideoDeviceType == VideoDeviceType.Software ? "Software Adapter" : "Adapter")}"
-                    })
-                    {
-                        resultDevice = device.QueryInterface<D3D11.Device5>();
-
-                        Log.Print($"Direct 3D 11.4 device created for video adapter '{adapterInfo.Name}' at feature set [{(FeatureSet)resultDevice.FeatureLevel}]",
-                                  LoggingLevel.Simple);
-                    }
-                }
+                Log.Print($"Direct 3D 11.4 device created for video adapter '{adapterInfo.Name}' at feature set [{(FeatureSet)resultDevice.FeatureLevel}]",
+                          LoggingLevel.Simple);
             }
 
             return (resultDevice, resultFactory, resultAdapter);

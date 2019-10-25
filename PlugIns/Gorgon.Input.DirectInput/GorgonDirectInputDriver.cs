@@ -80,22 +80,20 @@ namespace Gorgon.Input.DirectInput
             // This monstrosity is based on the code at:
             // https://msdn.microsoft.com/en-ca/library/windows/desktop/ee417014(v=vs.85).aspx
             // 
-            using (var session = CimSession.Create(null))
-            {
-                IEnumerable<string> results = from device in session.QueryInstances("root\\cimv2", "WQL", "SELECT DeviceID FROM Win32_PnPEntity")
-                                              let cimProp = device.CimInstanceProperties["DeviceID"]
-                                              where (cimProp != null) && (cimProp.CimType == CimType.String)
-                                              let deviceID = cimProp.Value?.ToString()
-                                              where !string.IsNullOrWhiteSpace(deviceID)
-                                              let pidIndex = deviceID.IndexOf("PID_", StringComparison.OrdinalIgnoreCase)
-                                              let vidIndex = deviceID.IndexOf("VID_", StringComparison.OrdinalIgnoreCase)
-                                              where deviceID.IndexOf("IG_", StringComparison.OrdinalIgnoreCase) != -1
-                                                    && pidIndex != -1
-                                                    && vidIndex != -1
-                                              select GetXInputDeviceID(deviceID, pidIndex, vidIndex);
+            using var session = CimSession.Create(null);
+            IEnumerable<string> results = from device in session.QueryInstances("root\\cimv2", "WQL", "SELECT DeviceID FROM Win32_PnPEntity")
+                                          let cimProp = device.CimInstanceProperties["DeviceID"]
+                                          where (cimProp != null) && (cimProp.CimType == CimType.String)
+                                          let deviceID = cimProp.Value?.ToString()
+                                          where !string.IsNullOrWhiteSpace(deviceID)
+                                          let pidIndex = deviceID.IndexOf("PID_", StringComparison.OrdinalIgnoreCase)
+                                          let vidIndex = deviceID.IndexOf("VID_", StringComparison.OrdinalIgnoreCase)
+                                          where deviceID.IndexOf("IG_", StringComparison.OrdinalIgnoreCase) != -1
+                                                && pidIndex != -1
+                                                && vidIndex != -1
+                                          select GetXInputDeviceID(deviceID, pidIndex, vidIndex);
 
-                return results.ToArray();
-            }            
+            return results.ToArray();
         }
 
         /// <summary>

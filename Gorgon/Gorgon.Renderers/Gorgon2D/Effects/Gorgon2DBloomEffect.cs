@@ -396,7 +396,7 @@ namespace Gorgon.Renderers
         /// </summary>
         private void UpSample()
         {
-            GorgonTexture2DView src = _sampleTargets[_sampleTargets.Length - 1].down.GetShaderResourceView();
+            GorgonTexture2DView src = _sampleTargets[^1].down.GetShaderResourceView();
 
             for (int i = _sampleTargets.Length - 2; i >= 0; --i)
             {

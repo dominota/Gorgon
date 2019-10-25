@@ -499,12 +499,10 @@ namespace Gorgon.Native
                 throw new ArgumentException(string.Format(Resources.GOR_ERR_DATABUFF_SIZE_OFFSET_TOO_LARGE, startIndex, count.Value));
             }
 
-            using (var writer = new GorgonBinaryWriter(stream, true))
+            using var writer = new GorgonBinaryWriter(stream, true);
+            for (int i = 0; i < count.Value; ++i)
             {
-                for (int i = 0; i < count.Value; ++i)
-                {
-                    writer.WriteValue(ref this[i + startIndex]);
-                }
+                writer.WriteValue(ref this[i + startIndex]);
             }
         }
 

@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Gorgon\Gorgon.Input\Gorgon.Input.csproj" />
-    <ProjectReference Include="..\..\Gorgon\Gorgon.Windows\Gorgon.Windows.csproj" />
   </ItemGroup>
 
   <ItemGroup>
