@@ -77,14 +77,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ColorPickerDialog.de.resx">
-      <DependentUpon>ColorPickerDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ColorPickerDialog.resx">
       <DependentUpon>ColorPickerDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ColorPickerPanel.de.resx">
-      <DependentUpon>ColorPickerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ColorPickerPanel.resx">
       <DependentUpon>ColorPickerPanel.cs</DependentUpon>

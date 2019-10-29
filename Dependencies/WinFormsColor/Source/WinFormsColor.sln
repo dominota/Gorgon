@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.539
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29418.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsColor", "WinFormsColor\WinFormsColor.csproj", "{E1E3F636-D272-462C-AD70-96414B318766}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{94A369D6-746D-4172-BB57-0AB0DC96B318}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinFormsColorNetCore3", "WinFormsColor\WinFormsColorNetCore3.csproj", "{097D81A5-A6EC-4703-9D1D-57C7B28EA809}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,18 @@ Global
 		{94A369D6-746D-4172-BB57-0AB0DC96B318}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{94A369D6-746D-4172-BB57-0AB0DC96B318}.Release|x86.ActiveCfg = Release|Any CPU
 		{94A369D6-746D-4172-BB57-0AB0DC96B318}.Release|x86.Build.0 = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Debug|x86.Build.0 = Debug|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|Any CPU.Build.0 = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|x86.ActiveCfg = Release|Any CPU
+		{097D81A5-A6EC-4703-9D1D-57C7B28EA809}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

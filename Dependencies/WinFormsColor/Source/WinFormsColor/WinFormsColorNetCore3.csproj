@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Version>1.0.0.0</Version>
+    <Authors>Adam</Authors>
+    <Company>Adam's Lair</Company>
+    <Product>WinFormsColor</Product>
+    <Description>WinFormsColor
+    
+Color selection component</Description>
+    <Copyright>Copyright © Adams Lair 2011</Copyright>
+    <PackageProjectUrl>https://blog.adamslair.net/</PackageProjectUrl>
+    <PackageTags>Graphics Colors</PackageTags>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>WinFormsColor</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>WinFormsColor.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>WinFormsColor</AssemblyName>
+    <NeutralLanguage>en-CA</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>bin\Debug\WinFormsColor.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\WinFormsColor.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="ColorPickerDialog.de.resx" />
+    <EmbeddedResource Remove="ColorPickerPanel.de.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="GorgonFull.snk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+</Project>
