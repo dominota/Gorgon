@@ -661,6 +661,8 @@ GetTextureOptions(textureFile.FullPath, textureOptions));
                 // Use all built-in codecs if we haven't asked for any.
                 animationCodecs = new IGorgonAnimationCodec[]
                                {
+                                   new GorgonV31AnimationBinaryCodec(renderer),
+                                   new GorgonV31AnimationJsonCodec(renderer),
                                    new GorgonV3AnimationBinaryCodec(renderer),
                                    new GorgonV3AnimationJsonCodec(renderer),
                                    new GorgonV1AnimationCodec(renderer)
@@ -697,7 +699,7 @@ GetTextureOptions(textureFile.FullPath, textureOptions));
                 IGorgonAnimation animation = animationCodec.FromStream(animStream, (int)file.Size);
 
                 // We have no textures to update, leave.
-                if (animation.Texture2DTrack.KeyFrames.Count == 0)
+                if (animation.Texture2DTracks.All(item => item.Value.KeyFrames.Count == 0))
                 {
                     return animation;
                 }
@@ -707,8 +709,10 @@ GetTextureOptions(textureFile.FullPath, textureOptions));
                 // V1 sprite animations need texture coordinate correction.
                 bool needsCoordinateFix = animationCodec is GorgonV1AnimationCodec;
 
-                foreach (GorgonKeyTexture2D textureKey in animation.Texture2DTrack.KeyFrames)
+                foreach (KeyValuePair<string, IGorgonAnimationTrack<GorgonKeyTexture2D>> track in animation.Texture2DTracks)
                 {
+                    foreach (GorgonKeyTexture2D textureKey in track.Value.KeyFrames)
+                    {
                     // Let's try and load the texture into memory.
                     // This does this by:
                     // 1. Checking to see if a texture resource with the name specified is already available in memory.
@@ -728,7 +732,7 @@ GetTextureOptions(textureFile.FullPath, textureOptions));
 textureStream,
 codec,
 textureFile.Size, GetTextureOptions(textureFile.FullPath, textureOptions));
-                    }
+                            }
 
                     if ((needsCoordinateFix) && (textureKey.Value != null))
                     {
@@ -737,6 +741,7 @@ textureFile.Size, GetTextureOptions(textureFile.FullPath, textureOptions));
                                                                        textureKey.TextureCoordinates.Width / textureKey.Value.Width,
                                                                        textureKey.TextureCoordinates.Height / textureKey.Value.Height);
                     }
+                }
                 }
 
                 return animation;

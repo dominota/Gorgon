@@ -26,6 +26,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Gorgon.Animation.Properties;
+using Gorgon.Diagnostics;
 using Gorgon.Graphics;
 using Gorgon.Graphics.Core;
 using Gorgon.Math;
@@ -62,7 +65,7 @@ namespace Gorgon.Animation
 	/// A controller will update the object properties over a certain time frame (or continuously if looped) using a <see cref="IGorgonAnimation"/>.
 	/// </para>
 	/// <para>
-	/// This controller will advance the time for an animation, and coordinate the changes from interpolation (if supported) between <see cref="IGorgonKeyFrame"/> items on a <see cref="IGorgonTrack{T}"/>.
+	/// This controller will advance the time for an animation, and coordinate the changes from interpolation (if supported) between <see cref="IGorgonKeyFrame"/> items on a <see cref="IGorgonAnimationTrack{T}"/>.
 	/// The values from the animation will then by applied to the object properties.
 	/// </para>
 	/// <para>
@@ -102,9 +105,18 @@ namespace Gorgon.Animation
         private T _animatedObject;
         // The current animation state.
         private AnimationState _state = AnimationState.Stopped;
+        // The list of registered track names.
+        private readonly List<GorgonTrackRegistration> _trackNames = new List<GorgonTrackRegistration>();
+        // The list of registered track names that can be played with a given animation.
+        private readonly List<GorgonTrackRegistration> _playableTracks = new List<GorgonTrackRegistration>();
         #endregion
 
         #region Properties.
+        /// <summary>
+        /// Property to return the list of available tracks used by this controller.
+        /// </summary>
+        public IReadOnlyList<GorgonTrackRegistration> RegisteredTracks => _trackNames;
+
         /// <summary>
         /// Property to return the currently playing animation.
         /// </summary>
@@ -196,102 +208,205 @@ namespace Gorgon.Animation
 
         #region Methods.
         /// <summary>
-        /// Function to update the animation.
+        /// Function to build up the playable track list.
         /// </summary>
-        private void NotifyAnimation()
+        /// <param name="animation">The animation to evaluate.</param>
+        private void BuildPlayableTracks(IGorgonAnimation animation)
         {
-            // Update each track.
-            if (TrackKeyProcessor.TryUpdateVector3(CurrentAnimation.Length, CurrentAnimation.PositionTrack, _time, out DX.Vector3 posValue))
-            {
-                OnPositionUpdate(_animatedObject, posValue);
-            }
+            _playableTracks.Clear();
 
-            if (TrackKeyProcessor.TryUpdateVector3(CurrentAnimation.Length, CurrentAnimation.ScaleTrack, _time, out DX.Vector3 scaleValue))
+            for (int i = 0; i < _trackNames.Count; ++i)
             {
-                OnScaleUpdate(_animatedObject, scaleValue);
-            }
+                GorgonTrackRegistration registration = _trackNames[i];
 
-            if (TrackKeyProcessor.TryUpdateVector3(CurrentAnimation.Length, CurrentAnimation.RotationTrack, _time, out DX.Vector3 rotValue))
-            {
-                OnRotationUpdate(_animatedObject, rotValue);
-            }
-
-            if (TrackKeyProcessor.TryUpdateVector3(CurrentAnimation.Length, CurrentAnimation.SizeTrack, _time, out DX.Vector3 sizeValue))
-            {
-                OnSizeUpdate(_animatedObject, sizeValue);
-            }
-
-            if (TrackKeyProcessor.TryUpdateColor(CurrentAnimation.Length, CurrentAnimation.ColorTrack, _time, out GorgonColor colorValue))
-            {
-                OnColorUpdate(_animatedObject, colorValue);
-            }
-
-            if (TrackKeyProcessor.TryUpdateRectBounds(CurrentAnimation.Length, CurrentAnimation.RectBoundsTrack, _time, out DX.RectangleF rectValue))
-            {
-                OnRectBoundsUpdate(_animatedObject, rectValue);
-            }
-
-            if (TrackKeyProcessor.TryUpdateTexture2D(CurrentAnimation.Length,
-                                                     _time,
-                                                     CurrentAnimation.Texture2DTrack,
-                                                     out GorgonTexture2DView texture,
-                                                     out DX.RectangleF textureCoordinates,
-                                                     out int textureArrayIndex))
-            {
-                OnTexture2DUpdate(_animatedObject, texture, textureCoordinates, textureArrayIndex);
+                switch (registration.KeyType)
+                {
+                    case AnimationTrackKeyType.Single:
+                        if (animation.SingleTracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector2:
+                        if (animation.Vector2Tracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector3:
+                        if (animation.Vector3Tracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector4:
+                        if (animation.Vector4Tracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Rectangle:
+                        if (animation.RectangleTracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Color:
+                        if (animation.ColorTracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Texture2D:
+                        if (animation.Texture2DTracks.ContainsKey(registration.TrackName))
+                        {
+                            _playableTracks.Add(registration);
+                        }
+                        break;
+                }
             }
         }
 
         /// <summary>
-        /// Function called when a rectangle boundary needs to be updated on the object.
+        /// Function to update the animation.
         /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="bounds">The new bounds.</param>
-        protected abstract void OnRectBoundsUpdate(T animObject, DX.RectangleF bounds);
+        private void NotifyAnimation()
+        {
+            for (int i = 0; i < _playableTracks.Count; ++i)
+            {
+                GorgonTrackRegistration registration = _playableTracks[i];
+
+                switch (registration.KeyType)
+                {
+                    case AnimationTrackKeyType.Single:
+                        if ((CurrentAnimation.SingleTracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeySingle> singleTrack))
+                            && (TrackKeyProcessor.TryUpdateSingle(CurrentAnimation.Length, singleTrack, _time, out float singleValue)))
+                        {
+                            OnSingleValueUpdate(registration, _animatedObject, singleValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector2:
+                        if ((CurrentAnimation.Vector2Tracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyVector2> vec2DTrack))
+                            && (TrackKeyProcessor.TryUpdateVector2(CurrentAnimation.Length, vec2DTrack, _time, out DX.Vector2 vec2DValue)))
+                        {
+                            OnVector2ValueUpdate(registration, _animatedObject, vec2DValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector3:
+                        if ((CurrentAnimation.Vector3Tracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyVector3> vec3DTrack))
+                            && (TrackKeyProcessor.TryUpdateVector3(CurrentAnimation.Length, vec3DTrack, _time, out DX.Vector3 vec3DValue)))
+                        {
+                            OnVector3ValueUpdate(registration, _animatedObject, vec3DValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Vector4:
+                        if ((CurrentAnimation.Vector4Tracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyVector4> vec4DTrack))
+                            && (TrackKeyProcessor.TryUpdateVector4(CurrentAnimation.Length, vec4DTrack, _time, out DX.Vector4 vec4DValue)))
+                        {
+                            OnVector4ValueUpdate(registration, _animatedObject, vec4DValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Rectangle:
+                        if ((CurrentAnimation.RectangleTracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyRectangle> rectTrack))
+                            && (TrackKeyProcessor.TryUpdateRectBounds(CurrentAnimation.Length, rectTrack, _time, out DX.RectangleF rectValue)))
+                        {
+                            OnRectangleUpdate(registration, _animatedObject, rectValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Color:
+                        if ((CurrentAnimation.ColorTracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyGorgonColor> colorTrack))
+                            && (TrackKeyProcessor.TryUpdateColor(CurrentAnimation.Length, colorTrack, _time, out GorgonColor colorValue)))
+                        {
+                            OnColorUpdate(registration, _animatedObject, colorValue);
+                        }
+                        break;
+                    case AnimationTrackKeyType.Texture2D:
+                        if ((CurrentAnimation.Texture2DTracks.TryGetValue(registration.TrackName, out IGorgonAnimationTrack<GorgonKeyTexture2D> textureTrack))
+                            && (TrackKeyProcessor.TryUpdateTexture2D(CurrentAnimation.Length, textureTrack, _time, out GorgonTexture2DView texture, out DX.RectangleF texCoords, out int texArray)))
+                        {
+                            OnTexture2DUpdate(registration, _animatedObject, texture, texCoords, texArray);
+                        }
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Function called when a single floating point value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+        protected abstract void OnSingleValueUpdate(GorgonTrackRegistration track, T animObject, float value);
+
+        /// <summary>
+        /// Function called when a 2D vector value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+        protected abstract void OnVector2ValueUpdate(GorgonTrackRegistration track, T animObject, DX.Vector2 value);
+
+        /// <summary>
+        /// Function called when a 3D vector value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+        protected abstract void OnVector3ValueUpdate(GorgonTrackRegistration track, T animObject, DX.Vector3 value);
+
+        /// <summary>
+        /// Function called when a 4D vector value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+        protected abstract void OnVector4ValueUpdate(GorgonTrackRegistration track, T animObject, DX.Vector4 value);
+
+        /// <summary>
+        /// Function called when a <see cref="GorgonColor"/> value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+	    protected abstract void OnColorUpdate(GorgonTrackRegistration track, T animObject, GorgonColor value);
+
+        /// <summary>
+        /// Function called when a SharpDX <c>RectangleF</c> value needs to be updated on the animated object.
+        /// </summary>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
+        /// <param name="value">The value to apply.</param>
+        protected abstract void OnRectangleUpdate(GorgonTrackRegistration track, T animObject, DX.RectangleF value);
 
         /// <summary>
         /// Function called when a texture needs to be updated on the object.
         /// </summary>
-        /// <param name="animObject">The object being animated.</param>
+        /// <param name="track">The track currently being processed.</param>
+        /// <param name="animObject">The object to update.</param>
         /// <param name="texture">The texture to switch to.</param>
         /// <param name="textureCoordinates">The new texture coordinates to apply.</param>
         /// <param name="textureArrayIndex">The texture array index.</param>
-        protected abstract void OnTexture2DUpdate(T animObject, GorgonTexture2DView texture, DX.RectangleF textureCoordinates, int textureArrayIndex);
+        protected abstract void OnTexture2DUpdate(GorgonTrackRegistration track, T animObject, GorgonTexture2DView texture, DX.RectangleF textureCoordinates, int textureArrayIndex);
 
         /// <summary>
-        /// Function called when a position needs to be updated on the object.
+        /// Function to register a track with the controller.
         /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="position">The new position.</param>
-	    protected abstract void OnPositionUpdate(T animObject, DX.Vector3 position);
+        /// <param name="registration">The data used to register the track.</param>
+        /// <exception cref="ArgumentException">Thrown when the track <paramref name="registration"/> data is already registered.</exception>
+        /// <exception cref="NotSupportedException">Thrown when the <paramref name="registration"/> <see cref="GorgonTrackRegistration.KeyType"/> parameter does not have an equivalent supported track key frame data type.</exception>
+        protected void RegisterTrack(GorgonTrackRegistration registration)
+        {
+            registration.TrackName.ValidateObject(nameof(registration.TrackName));
 
-        /// <summary>
-        /// Function called when a scale needs to be updated on the object.
-        /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="scale">The new scale.</param>
-        protected abstract void OnScaleUpdate(T animObject, DX.Vector3 scale);
+            // Check for a track with the same name.
+            if (_trackNames.Any(item => item.Equals(registration)))
+            {
+                throw new ArgumentException(Resources.GORANM_TRACK_ALREADY_EXISTS, nameof(registration));
+            }
 
-        /// <summary>
-        /// Function called when the angle of rotation needs to be updated on the object.
-        /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="rotation">The new angle of rotation, in degrees, on the x, y and z axes.</param>
-        protected abstract void OnRotationUpdate(T animObject, DX.Vector3 rotation);
-
-        /// <summary>
-        /// Function called when the color needs to be updated on the object.
-        /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="color">The new color.</param>
-	    protected abstract void OnColorUpdate(T animObject, GorgonColor color);
-
-        /// <summary>
-        /// Function called when the size needs to be updated on the object.
-        /// </summary>
-        /// <param name="animObject">The object being animated.</param>
-        /// <param name="size">The new size.</param>
-        protected abstract void OnSizeUpdate(T animObject, DX.Vector3 size);
+            _trackNames.Add(registration);
+        }
 
         /// <summary>
         /// Function to update the currently playing animation time and bound properties.
@@ -376,6 +491,8 @@ namespace Gorgon.Animation
                 return;
             }
 
+            BuildPlayableTracks(animation);
+
             // Stop the current animation.
             if (CurrentAnimation != null)
             {
@@ -442,6 +559,7 @@ namespace Gorgon.Animation
                 return;
             }
 
+            _playableTracks.Clear();
             State = AnimationState.Stopped;
             _loopCount = 0;
             _animatedObject = null;
