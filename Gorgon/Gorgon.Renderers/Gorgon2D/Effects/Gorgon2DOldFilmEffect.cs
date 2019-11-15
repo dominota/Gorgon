@@ -46,7 +46,7 @@ namespace Gorgon.Renderers
     /// </para>
     /// </remarks>
     public class Gorgon2DOldFilmEffect
-        : Gorgon2DEffect
+        : Gorgon2DEffect, IGorgon2DCompositorEffect
     {
         #region Constants.
         /// <summary>
@@ -368,6 +368,15 @@ namespace Gorgon.Renderers
             get;
             set;
         }
+
+        /// <summary>
+        /// Property to set or return the offset that can be used to simulate shaking.
+        /// </summary>
+        public DX.Vector2 ShakeOffset
+        {
+            get;
+            set;
+        }
         #endregion
 
         #region Methods.
@@ -442,27 +451,12 @@ namespace Gorgon.Renderers
 
             // Create pixel shader.
             _filmShader = CompileShader<GorgonPixelShader>(Resources.FilmGrain, "GorgonPixelShaderFilmGrain");
-            _filmState = PixelShaderBuilder
-                          .ConstantBuffer(_timingBuffer, 1)
-                          .ConstantBuffer(_scratchBuffer, 2)
-                          .ConstantBuffer(_sepiaBuffer, 3)
-                          .ShaderResource(_randomTexture, 1)
-                          .SamplerState(GorgonSamplerState.Wrapping, 1)
-                          .Shader(_filmShader)
-                          .Build();
-
-            // Build our state.
-            _batchState = BatchStateBuilder
-                          .BlendState(GorgonBlendState.NoBlending)
-                          .PixelShaderState(_filmState)
-                          .Build();
         }
 
         /// <summary>
         /// Function called prior to rendering.
         /// </summary>
         /// <param name="output">The final render target that will receive the rendering from the effect.</param>
-        /// <param name="camera">The currently active camera.</param>
         /// <param name="sizeChanged"><b>true</b> if the output size changed since the last render, or <b>false</b> if it's the same.</param>
         /// <remarks>
         /// <para>
@@ -470,7 +464,7 @@ namespace Gorgon.Renderers
         /// targets (if applicable).
         /// </para>
         /// </remarks>
-        protected override void OnBeforeRender(GorgonRenderTargetView output, IGorgon2DCamera camera, bool sizeChanged)
+        protected override void OnBeforeRender(GorgonRenderTargetView output, bool sizeChanged)
         {
             if (Graphics.RenderTargets[0] != output)
             {
@@ -496,22 +490,32 @@ namespace Gorgon.Renderers
         /// Function called to build a new (or return an existing) 2D batch state.
         /// </summary>
         /// <param name="passIndex">The index of the current rendering pass.</param>
+        /// <param name="builders">The builder types that will manage the state of the effect.</param>
         /// <param name="statesChanged"><b>true</b> if the blend, raster, or depth/stencil state was changed. <b>false</b> if not.</param>
         /// <returns>The 2D batch state.</returns>
-        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, bool statesChanged) => _batchState;
+        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, IGorgon2DEffectBuilders builders, bool statesChanged)
+        {
+            if (_batchState == null)
+            {
+                _filmState = builders.PixelShaderBuilder
+                              .ConstantBuffer(_timingBuffer, 1)
+                              .ConstantBuffer(_scratchBuffer, 2)
+                              .ConstantBuffer(_sepiaBuffer, 3)
+                              .ShaderResource(_randomTexture, 1)
+                              .SamplerState(GorgonSamplerState.Wrapping, 1)
+                              .Shader(_filmShader)
+                              .Build();
 
-        /// <summary>
-        /// Function called to render a single effect pass.
-        /// </summary>
-        /// <param name="passIndex">The index of the pass being rendered.</param>
-        /// <param name="renderMethod">The method used to render a scene for the effect.</param>
-        /// <param name="output">The render target that will receive the final render data.</param>
-        /// <remarks>
-        /// <para>
-        /// Applications must implement this in order to see any results from the effect.
-        /// </para>
-        /// </remarks>
-        protected override void OnRenderPass(int passIndex, Action<int, int, DX.Size2> renderMethod, GorgonRenderTargetView output) => renderMethod(passIndex, PassCount, new DX.Size2(output.Width, output.Height));
+                // Build our state.
+                _batchState = builders.BatchBuilder
+                              .BlendState(GorgonBlendState.NoBlending)
+                              .PixelShaderState(_filmState)
+                              .Build();
+
+            }
+
+            return _batchState;
+        }
 
         /// <summary>
         /// Function called after rendering is complete.
@@ -645,6 +649,40 @@ namespace Gorgon.Renderers
             buffer1?.Dispose();
             buffer2?.Dispose();
             buffer3?.Dispose();
+        }
+
+        /// <summary>
+        /// Function to render the effect.
+        /// </summary>
+        /// <param name="texture">The texture to blur and render to the output.</param>
+        /// <param name="output">The output render target.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="texture"/>, or the <paramref name="output"/> parameter is <b>null</b>.</exception>
+        /// <remarks>
+        /// <para>
+        /// <note type="important">
+        /// <para>
+        /// For performance reasons, any exceptions thrown by this method will only be thrown when Gorgon is compiled as DEBUG.
+        /// </para>
+        /// </note>
+        /// </para>
+        /// </remarks>
+        public void Render(GorgonTexture2DView texture, GorgonRenderTargetView output)
+        {
+            BeginRender(output);
+
+            switch (BeginPass(0, output))
+            {
+                case PassContinuationState.Continue:
+                    Renderer.DrawFilledRectangle(new DX.RectangleF(ShakeOffset.X, ShakeOffset.Y, output.Width, output.Height), GorgonColor.White, texture, new DX.RectangleF(0, 0, 1, 1));                    
+                    break;
+                default:
+                    EndRender(null);
+                    return;
+            }
+
+            EndPass(0, output);            
+
+            EndRender(output);
         }
         #endregion
 

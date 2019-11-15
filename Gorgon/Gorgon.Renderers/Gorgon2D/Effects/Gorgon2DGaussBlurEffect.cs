@@ -40,7 +40,7 @@ namespace Gorgon.Renderers
     /// A gaussian blur effect.
     /// </summary>
     public class Gorgon2DGaussBlurEffect
-        : Gorgon2DEffect
+        : Gorgon2DEffect, IGorgon2DCompositorEffect
     {
         #region Variables.
         // The shader used for blurring.
@@ -260,11 +260,11 @@ namespace Gorgon.Renderers
             _blurRtvInfo.Width = _renderTargetSize.Width;
             _blurRtvInfo.Height = _renderTargetSize.Height;
 
-            _hPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, $"Gorgon2DGuassBlurEffect_HBlurRtv", clearOnRetrieve: false);
+            _hPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, "GorgonGaussBlur_HPass", clearOnRetrieve: false);
 
             _hPassView = _hPass.GetShaderResourceView();
 
-            _vPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, "Gorgon2DGuassBlurEffect_VBlurRtv", clearOnRetrieve: false);
+            _vPass = Graphics.TemporaryTargets.Rent(_blurRtvInfo, "GorgonGaussBlur_VPass", clearOnRetrieve: false);
             _vPassView = _vPass.GetShaderResourceView();
         }
 
@@ -349,33 +349,73 @@ namespace Gorgon.Renderers
         }
 
         /// <summary>
-        /// Function called to build a new (or return an existing) 2D batch state.
+        /// Function to build up the state for the effect.
         /// </summary>
+        /// <param name="builders">The builder types that will manage the state of the effect.</param>
+        private void BuildState(IGorgon2DEffectBuilders builders)
+        {
+            if (_blurState == null)
+            {
+                _blurState = builders.PixelShaderBuilder.SamplerState(GorgonSamplerState.Default)
+                                                        .ConstantBuffer(_blurBufferKernel, 1)
+                                                        .ConstantBuffer(_blurBufferPass, 2)
+                                                        .Shader(_blurShader)
+                                                        .Build();
+            }
+
+            if (_blurStateNoAlpha == null)
+            {
+                _blurStateNoAlpha = builders.PixelShaderBuilder.Shader(_blurShaderNoAlpha)
+                                                               .Build();
+            }
+
+            _batchState = builders.BatchBuilder.Clear()
+                          .BlendState(GorgonBlendState.NoBlending)
+                          .PixelShaderState(_blurState)
+                          .Build(BatchStateAllocator);
+
+            _batchStateNoAlpha = builders.BatchBuilder.Clear()
+                                 .BlendState(GorgonBlendState.NoBlending)
+                                 .PixelShaderState(_blurStateNoAlpha)
+                                 .Build(BatchStateAllocator);
+        }
+
+        /// <summary>Function called to build a new (or return an existing) 2D batch state.</summary>
         /// <param name="passIndex">The index of the current rendering pass.</param>
-        /// <param name="statesChanged"><b>true</b> if the blend, raster, or depth/stencil state was changed. <b>false</b> if not.</param>
+        /// <param name="builders">The builder types that will manage the state of the effect.</param>
+        /// <param name="statesChanged">
+        ///   <b>true</b> if the blend, raster, or depth/stencil state was changed. <b>false</b> if not.</param>
         /// <returns>The 2D batch state.</returns>
-        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, bool statesChanged) => PreserveAlpha ? _batchStateNoAlpha : _batchState;
+        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, IGorgon2DEffectBuilders builders, bool statesChanged)
+        {
+            if ((_batchStateNoAlpha == null)
+                || (_batchState == null))
+            {
+                BuildState(builders);
+            }
+
+            return PreserveAlpha? _batchStateNoAlpha : _batchState;
+        }
 
         /// <summary>
         /// Function called to render a single effect pass.
         /// </summary>
+        /// <param name="texture">The texture to blur.</param>
         /// <param name="passIndex">The index of the pass being rendered.</param>
-        /// <param name="renderMethod">The method used to render a scene for the effect.</param>
-        /// <param name="output">The render target that will receive the final render data.</param>
         /// <remarks>
         /// <para>
         /// Applications must implement this in order to see any results from the effect.
         /// </para>
         /// </remarks>
-        protected override void OnRenderPass(int passIndex, Action<int, int, DX.Size2> renderMethod, GorgonRenderTargetView output)
+        protected void BlurTexture(GorgonTexture2DView texture, int passIndex)
         {
             switch (passIndex)
             {
                 case 0:
-                    renderMethod(passIndex, PassCount, new DX.Size2(_vPassView.Width, _vPassView.Height));
+                    Renderer.DrawFilledRectangle(new DX.RectangleF(0, 0, _hPassView.Width, _hPassView.Height), GorgonColor.White, texture, new DX.RectangleF(0, 0, 1, 1));
                     break;
                 case 1:
-                    BlitTexture(_hPassView, new DX.Size2(_hPass.Width, _hPass.Height));
+                    Renderer.DrawFilledRectangle(new DX.RectangleF(0, 0, _vPassView.Width, _vPassView.Height), GorgonColor.White, _hPassView, new DX.RectangleF(0, 0, 1, 1));
                     break;
             }
         }
@@ -405,37 +445,17 @@ namespace Gorgon.Renderers
 
             // Set up the constants used by our pixel shader.
             _blurShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderGaussBlur");
-            PixelShaderBuilder.SamplerState(GorgonSamplerState.Default)
-                              .ConstantBuffer(_blurBufferKernel, 1)
-                              .ConstantBuffer(_blurBufferPass, 2)
-                              .Shader(_blurShader);
-
-            _blurState = PixelShaderBuilder.Build();
 
             _blurShaderNoAlpha = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderGaussBlurNoAlpha");
-            PixelShaderBuilder.Shader(_blurShaderNoAlpha);
-
-            _blurStateNoAlpha = PixelShaderBuilder.Build();
 
             UpdateKernelWeights();
             UpdateOffsets();
-
-            _batchState = BatchStateBuilder
-                          .BlendState(GorgonBlendState.NoBlending)
-                          .PixelShaderState(_blurState)
-                          .Build();
-
-            _batchStateNoAlpha = BatchStateBuilder
-                                 .BlendState(GorgonBlendState.NoBlending)
-                                 .PixelShaderState(_blurStateNoAlpha)
-                                 .Build();
         }
 
         /// <summary>
         /// Function called prior to rendering.
         /// </summary>
         /// <param name="output">The final render target that will receive the rendering from the effect.</param>
-        /// <param name="camera">The currently active camera.</param>
         /// <param name="sizeChanged"><b>true</b> if the output size changed since the last render, or <b>false</b> if it's the same.</param>
         /// <remarks>
         /// <para>
@@ -443,7 +463,7 @@ namespace Gorgon.Renderers
         /// targets (if applicable).
         /// </para>
         /// </remarks>
-        protected override void OnBeforeRender(GorgonRenderTargetView output, IGorgon2DCamera camera, bool sizeChanged)
+        protected override void OnBeforeRender(GorgonRenderTargetView output, bool sizeChanged)
         {
             if (_needKernelUpdate)
             {
@@ -510,13 +530,8 @@ namespace Gorgon.Renderers
                 return;
             }
 
-            if (Graphics.RenderTargets[0] != output)
-            {
-                Graphics.SetRenderTarget(output, Graphics.DepthStencilView);
-            }
-
             Renderer.Begin(Gorgon2DBatchState.NoBlend);
-            BlitTexture(_vPassView, new DX.Size2(output.Width, output.Height));
+            Renderer.DrawFilledRectangle(new DX.RectangleF(0, 0, output.Width, output.Height), GorgonColor.White, _vPassView, new DX.RectangleF(0, 0, 1, 1));
             Renderer.End();
 
             FreeTargets();
@@ -546,6 +561,45 @@ namespace Gorgon.Renderers
             kernelData?.Dispose();
             kernelBuffer?.Dispose();
             passBuffer?.Dispose();
+        }
+
+        /// <summary>
+        /// Function to render the effect.
+        /// </summary>
+        /// <param name="texture">The texture to blur and render to the output.</param>
+        /// <param name="output">The output render target.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="texture"/>, or the <paramref name="output"/> parameter is <b>null</b>.</exception>
+        /// <remarks>
+        /// <para>
+        /// <note type="important">
+        /// <para>
+        /// For performance reasons, any exceptions thrown by this method will only be thrown when Gorgon is compiled as DEBUG.
+        /// </para>
+        /// </note>
+        /// </para>
+        /// </remarks>
+        public void Render(GorgonTexture2DView texture, GorgonRenderTargetView output) 
+        {
+            BeginRender(output);
+
+            for (int i = 0; i < PassCount; ++i)
+            {
+                switch (BeginPass(i, output))
+                {
+                    case PassContinuationState.Continue:
+                        BlurTexture(texture, i);
+                        break;
+                    case PassContinuationState.Skip:
+                        continue;
+                    default:
+                        EndRender(output);
+                        return;
+                }
+
+                EndPass(i, output);
+            }
+
+            EndRender(output);
         }
         #endregion
 

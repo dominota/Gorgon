@@ -20,37 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // 
-// Created: February 5, 2019 7:46:30 PM
+// Created: November 7, 2019 1:42:13 PM
 // 
 #endregion
 
-using Gorgon.Core;
-using Gorgon.Editor.UI;
+using Gorgon.Graphics.Core;
 
-namespace Gorgon.Editor.ImageEditor.ViewModels
+namespace Gorgon.Renderers
 {
     /// <summary>
-    /// The view model for the set alpha settings view.
+    /// The concrete implementation of <see cref="IGorgon2DEffectBuilders"/>.
     /// </summary>
-    internal interface IAlphaSettings
-        : IHostedPanelViewModel
+    internal class EffectBuilders
+        : IGorgon2DEffectBuilders
     {
-        /// <summary>
-        /// Property to set or return the alpha value to set.
-        /// </summary>
-        int AlphaValue
+        /// <summary>Property to return the batch state builder.</summary>
+        public Gorgon2DBatchStateBuilder BatchBuilder
         {
             get;
-            set;
-        }
+        } = new Gorgon2DBatchStateBuilder();
 
-        /// <summary>
-        /// Property to set or return the lower and upper bounds of the alpha range to update.
-        /// </summary>
-        GorgonRange UpdateRange
+        /// <summary>Property to return the vertex shader state builder.</summary>
+        public Gorgon2DShaderStateBuilder<GorgonVertexShader> VertexShaderBuilder
         {
             get;
-            set;
-        }
+        } = new Gorgon2DShaderStateBuilder<GorgonVertexShader>();
+
+        /// <summary>Property to return the pixel shader state builder.</summary>
+        public Gorgon2DShaderStateBuilder<GorgonPixelShader> PixelShaderBuilder
+        {
+            get;
+        } = new Gorgon2DShaderStateBuilder<GorgonPixelShader>();
     }
 }

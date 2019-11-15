@@ -20,37 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // 
-// Created: February 5, 2019 7:46:30 PM
+// Created: September 23, 2019 4:33:14 PM
 // 
 #endregion
 
-using Gorgon.Core;
-using Gorgon.Editor.UI;
+using Gorgon.Graphics.Core;
+using Gorgon.Memory;
 
-namespace Gorgon.Editor.ImageEditor.ViewModels
+namespace Gorgon.Renderers
 {
     /// <summary>
-    /// The view model for the set alpha settings view.
-    /// </summary>
-    internal interface IAlphaSettings
-        : IHostedPanelViewModel
+    /// An allocator used to retrieve 2D shader states from a pool.
+    /// </summary>    
+    public class Gorgon2DShaderStatePoolAllocator<T>
+        : GorgonRingPool<Gorgon2DShaderState<T>>
+        where T : GorgonShader
     {
-        /// <summary>
-        /// Property to set or return the alpha value to set.
-        /// </summary>
-        int AlphaValue
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Property to set or return the lower and upper bounds of the alpha range to update.
-        /// </summary>
-        GorgonRange UpdateRange
-        {
-            get;
-            set;
-        }
+        #region Constructor/Finalizer.
+        /// <summary>Initializes a new instance of the <see cref="Gorgon2DShaderStatePoolAllocator{T}"/> class.</summary>
+        /// <param name="objectCount">[Optional] The number of objects to initialize the pool with.</param>
+        public Gorgon2DShaderStatePoolAllocator(int objectCount = 128)
+            : base(objectCount) => ItemAllocator = () => new Gorgon2DShaderState<T>();        
+        #endregion        
     }
 }

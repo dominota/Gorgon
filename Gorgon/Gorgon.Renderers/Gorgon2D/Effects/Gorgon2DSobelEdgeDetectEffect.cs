@@ -24,7 +24,6 @@
 // 
 #endregion
 
-using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -39,7 +38,7 @@ namespace Gorgon.Renderers
     /// An effect that renders the edges of an image with Sobel edge detection.
     /// </summary>
     public class Gorgon2DSobelEdgeDetectEffect
-        : Gorgon2DEffect
+        : Gorgon2DEffect, IGorgon2DCompositorEffect
     {
         #region Value Types.
         /// <summary>
@@ -94,9 +93,29 @@ namespace Gorgon.Renderers
         private bool _isUpdated = true;
         // The thickness of the lines.
         private float _lineThickness = 1.0f;
+        // The texture size used to calculate the line thickness.
+        private DX.Size2F _textureSize = new DX.Size2F(512.0f, 512.0f);
         #endregion
 
         #region Properties.
+        /// <summary>
+        /// Property to set or return the offset of the shapren/embossing edges.
+        /// </summary>
+        public DX.Size2F TextureSize
+        {
+            get => _textureSize;
+            set
+            {
+                if (_textureSize == value)
+                {
+                    return;
+                }
+
+                _textureSize = value;
+                _isUpdated = true;
+            }
+        }
+
         /// <summary>
         /// Property to set or return the relative thickness of the line.
         /// </summary>
@@ -176,30 +195,31 @@ namespace Gorgon.Renderers
         protected override void OnInitialize()
         {
             _sobelBuffer = GorgonConstantBufferView.CreateConstantBuffer(Graphics, ref _settings, "Gogron 2D Sobel Edge Detect Filter Effect Constant Buffer");
-
             _sobelShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderSobelEdge");
-            _sobelState = PixelShaderBuilder
-                      .ConstantBuffer(_sobelBuffer, 1)
-                      .Shader(_sobelShader)
-                      .Build();
-
-
-            _batchState = BatchStateBuilder
-                          .PixelShaderState(_sobelState)
-                          .Build();
         }
 
         /// <summary>
         /// Function called to build a new (or return an existing) 2D batch state.
         /// </summary>
         /// <param name="passIndex">The index of the current rendering pass.</param>
+        /// <param name="builders">The builder types that will manage the state of the effect.</param>
         /// <param name="statesChanged"><b>true</b> if the blend, raster, or depth/stencil state was changed. <b>false</b> if not.</param>
         /// <returns>The 2D batch state.</returns>
-        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, bool statesChanged)
+        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, IGorgon2DEffectBuilders builders, bool statesChanged)
         {
-            if (statesChanged)
+            if ((_batchState == null) || (statesChanged))
             {
-                _batchState = BatchStateBuilder.Build();
+                if (_sobelState == null)
+                {
+                    _sobelState = builders.PixelShaderBuilder
+                              .ConstantBuffer(_sobelBuffer, 1)
+                              .Shader(_sobelShader)
+                              .Build();
+                }
+                
+                _batchState = builders.BatchBuilder
+                              .PixelShaderState(_sobelState)
+                              .Build(BatchStateAllocator);
             }
 
             return _batchState;
@@ -209,7 +229,6 @@ namespace Gorgon.Renderers
         /// Function called prior to rendering.
         /// </summary>
         /// <param name="output">The final render target that will receive the rendering from the effect.</param>
-        /// <param name="camera">The currently active camera.</param>
         /// <param name="sizeChanged"><b>true</b> if the output size changed since the last render, or <b>false</b> if it's the same.</param>
         /// <remarks>
         /// <para>
@@ -217,41 +236,17 @@ namespace Gorgon.Renderers
         /// targets (if applicable).
         /// </para>
         /// </remarks>
-        protected override void OnBeforeRender(GorgonRenderTargetView output, IGorgon2DCamera camera, bool sizeChanged)
+        protected override void OnBeforeRender(GorgonRenderTargetView output, bool sizeChanged)
         {
-            if (Graphics.RenderTargets[0] != output)
-            {
-                Graphics.SetRenderTarget(output, Graphics.DepthStencilView);
-                _isUpdated = true;
-            }
-
-            if (sizeChanged)
-            {
-                _settings = new Settings(_settings.LineColor, new DX.Vector2((1.0f / output.Width) * LineThickness, (1.0f / output.Height) * LineThickness), _settings.Threshold);
-                _isUpdated = true;
-            }
-
             if (!_isUpdated)
             {
                 return;
             }
 
+            _settings = new Settings(_settings.LineColor, new DX.Vector2((1.0f / _textureSize.Width) * LineThickness, (1.0f / _textureSize.Height) * LineThickness), _settings.Threshold);
             _sobelBuffer.Buffer.SetData(ref _settings);
             _isUpdated = false;
         }
-
-        /// <summary>
-        /// Function called to render a single effect pass.
-        /// </summary>
-        /// <param name="passIndex">The index of the pass being rendered.</param>
-        /// <param name="renderMethod">The method used to render a scene for the effect.</param>
-        /// <param name="output">The render target that will receive the final render data.</param>
-        /// <remarks>
-        /// <para>
-        /// Applications must implement this in order to see any results from the effect.
-        /// </para>
-        /// </remarks>
-        protected override void OnRenderPass(int passIndex, Action<int, int, DX.Size2> renderMethod, GorgonRenderTargetView output) => renderMethod(passIndex, PassCount, new DX.Size2(output.Width, output.Height));
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
@@ -264,6 +259,65 @@ namespace Gorgon.Renderers
 
             buffer?.Dispose();
             shader?.Dispose();
+        }
+
+        /// <summary>
+        /// Function to begin rendering the effect.
+        /// </summary>
+        /// <param name="blendState">[Optional] A user defined blend state to apply when rendering.</param>
+        /// <param name="depthStencilState">[Optional] A user defined depth/stencil state to apply when rendering.</param>
+        /// <param name="rasterState">[Optional] A user defined rasterizer state to apply when rendering.</param>
+        /// <param name="camera">[Optional] The camera to use when rendering.</param>
+        public void Begin(GorgonBlendState blendState = null, GorgonDepthStencilState depthStencilState = null, GorgonRasterState rasterState = null, IGorgon2DCamera camera = null)
+        {
+            GorgonRenderTargetView target = Graphics.RenderTargets[0];
+
+            if (target == null)
+            {
+                return;
+            }
+
+            BeginRender(target, blendState, depthStencilState, rasterState);
+            BeginPass(0, target, camera);
+        }
+
+        /// <summary>
+        /// Function to end the effect rendering.
+        /// </summary>
+        public void End()
+        {
+            GorgonRenderTargetView target = Graphics.RenderTargets[0];
+
+            if (target == null)
+            {
+                return;
+            }
+
+            EndPass(0, target);
+            EndRender(target);
+        }
+
+        /// <summary>
+        /// Function to render an effect under the <see cref="Gorgon2DCompositor"/>.
+        /// </summary>
+        /// <param name="texture">The texture to render into the next target.</param>
+        /// <param name="output">The render target that will receive the final output.</param>
+        public void Render(GorgonTexture2DView texture, GorgonRenderTargetView output)
+        {
+            if ((texture == null) || (output == null))
+            {
+                return;
+            }
+
+            Graphics.SetRenderTarget(output);
+
+            Begin(GorgonBlendState.Default, GorgonDepthStencilState.Default, GorgonRasterState.Default, null);
+
+            Renderer.DrawFilledRectangle(new DX.RectangleF(0, 0, output.Width, output.Height),
+                                            GorgonColor.White,
+                                            texture,
+                                            new DX.RectangleF(0, 0, 1, 1));
+            End();
         }
         #endregion
 

@@ -24,12 +24,11 @@
 // 
 #endregion
 
-using System;
 using System.Threading;
+using Gorgon.Graphics;
 using Gorgon.Graphics.Core;
 using Gorgon.Renderers.Properties;
 using DX = SharpDX;
-
 
 namespace Gorgon.Renderers
 {
@@ -42,7 +41,7 @@ namespace Gorgon.Renderers
     /// </para>
     /// </remarks>
     public class Gorgon2DBurnDodgeEffect
-        : Gorgon2DEffect
+        : Gorgon2DEffect, IGorgon2DCompositorEffect
     {
         #region Variables.
         // Burn/dodge buffer.
@@ -108,37 +107,45 @@ namespace Gorgon.Renderers
                                                                                  SizeInBytes = 16
                                                                              });
 
-            _dodgeBurnShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderLinearBurnDodge");
-            _linearDodgeBurnShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderBurnDodge");
-
-            _linearDodgeBurn = PixelShaderBuilder
-                               .Shader(_linearDodgeBurnShader)
-                               .ConstantBuffer(_burnDodgeBuffer, 1)
-                               .Build();
-
-            _dodgeBurn = PixelShaderBuilder
-                         .Shader(_dodgeBurnShader)
-                         .Build();
-
-            _batchStateLinearDodgeBurn = BatchStateBuilder.PixelShaderState(_linearDodgeBurn)
-                                                          .Build();
-            _batchStateDodgeBurn = BatchStateBuilder.PixelShaderState(_dodgeBurn)
-                                                    .Build();
+            _dodgeBurnShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderBurnDodge");
+            _linearDodgeBurnShader = CompileShader<GorgonPixelShader>(Resources.BasicSprite, "GorgonPixelShaderLinearBurnDodge");
         }
 
         /// <summary>
         /// Function called to build a new (or return an existing) 2D batch state.
         /// </summary>
         /// <param name="passIndex">The index of the current rendering pass.</param>
+        /// <param name="builders">The builder types that will manage the state of the effect.</param>
         /// <param name="statesChanged"><b>true</b> if the blend, raster, or depth/stencil state was changed. <b>false</b> if not.</param>
         /// <returns>The 2D batch state.</returns>
-        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, bool statesChanged)
+        protected override Gorgon2DBatchState OnGetBatchState(int passIndex, IGorgon2DEffectBuilders builders, bool statesChanged)
         {
             // ReSharper disable once InvertIf
-            if (statesChanged)
+            if ((_batchStateDodgeBurn == null) || (_batchStateLinearDodgeBurn == null) || (statesChanged))
             {
-                _batchStateLinearDodgeBurn = BatchStateBuilder.Build();
-                _batchStateDodgeBurn = BatchStateBuilder.Build();
+
+                if (_linearDodgeBurn == null)
+                {
+                    _linearDodgeBurn = builders.PixelShaderBuilder.Clear()
+                                       .Shader(_linearDodgeBurnShader)
+                                       .ConstantBuffer(_burnDodgeBuffer, 1)
+                                       .Build();
+                }
+
+                if (_dodgeBurn == null)
+                {
+                    _dodgeBurn = builders.PixelShaderBuilder.Clear()
+                                 .Shader(_dodgeBurnShader)
+                                 .ConstantBuffer(_burnDodgeBuffer, 1)
+                                 .Build();
+                }
+
+                _batchStateLinearDodgeBurn = builders.BatchBuilder
+                                                    .PixelShaderState(_linearDodgeBurn)
+                                                    .Build(BatchStateAllocator);
+                _batchStateDodgeBurn = builders.BatchBuilder
+                                                    .PixelShaderState(_dodgeBurn)
+                                                    .Build(BatchStateAllocator);
             }
 
             return UseLinear ? _batchStateLinearDodgeBurn : _batchStateDodgeBurn;
@@ -148,7 +155,6 @@ namespace Gorgon.Renderers
         /// Function called prior to rendering.
         /// </summary>
         /// <param name="output">The final render target that will receive the rendering from the effect.</param>
-        /// <param name="camera">The currently active camera.</param>
         /// <param name="sizeChanged"><b>true</b> if the output size changed since the last render, or <b>false</b> if it's the same.</param>
         /// <remarks>
         /// <para>
@@ -156,34 +162,17 @@ namespace Gorgon.Renderers
         /// targets (if applicable).
         /// </para>
         /// </remarks>
-        protected override void OnBeforeRender(GorgonRenderTargetView output, IGorgon2DCamera camera, bool sizeChanged)
+        protected override void OnBeforeRender(GorgonRenderTargetView output, bool sizeChanged)
         {
-            if (Graphics.RenderTargets[0] != output)
-            {
-                Graphics.SetRenderTarget(output, Graphics.DepthStencilView);
-            }
-
             if (!_isUpdated)
             {
                 return;
             }
 
-            _burnDodgeBuffer.Buffer.SetData(ref _useDodge);
+            int value = _useDodge ? 1 : 0;
+            _burnDodgeBuffer.Buffer.SetData(ref value);
             _isUpdated = false;
         }
-
-        /// <summary>
-        /// Function called to render a single effect pass.
-        /// </summary>
-        /// <param name="passIndex">The index of the pass being rendered.</param>
-        /// <param name="renderMethod">The method used to render a scene for the effect.</param>
-        /// <param name="output">The render target that will receive the final render data.</param>
-        /// <remarks>
-        /// <para>
-        /// Applications must implement this in order to see any results from the effect.
-        /// </para>
-        /// </remarks>
-        protected override void OnRenderPass(int passIndex, Action<int, int, DX.Size2> renderMethod, GorgonRenderTargetView output) => renderMethod(passIndex, PassCount, new DX.Size2(output.Width, output.Height));
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
@@ -203,6 +192,65 @@ namespace Gorgon.Renderers
             buffer?.Dispose();
             shader1?.Dispose();
             shader2?.Dispose();
+        }
+
+        /// <summary>
+        /// Function to begin rendering the effect.
+        /// </summary>
+        /// <param name="blendState">[Optional] A user defined blend state to apply when rendering.</param>
+        /// <param name="depthStencilState">[Optional] A user defined depth/stencil state to apply when rendering.</param>
+        /// <param name="rasterState">[Optional] A user defined rasterizer state to apply when rendering.</param>
+        /// <param name="camera">[Optional] The camera to use when rendering.</param>
+        public void Begin(GorgonBlendState blendState = null, GorgonDepthStencilState depthStencilState = null, GorgonRasterState rasterState = null, IGorgon2DCamera camera = null)
+        {
+            GorgonRenderTargetView target = Graphics.RenderTargets[0];
+
+            if (target == null)
+            {
+                return;
+            }
+
+            BeginRender(target, blendState, depthStencilState, rasterState);
+            BeginPass(0, target, camera);
+        }
+
+        /// <summary>
+        /// Function to end the effect rendering.
+        /// </summary>
+        public void End()
+        {
+            GorgonRenderTargetView target = Graphics.RenderTargets[0];
+
+            if (target == null)
+            {
+                return;
+            }
+
+            EndPass(0, target);
+            EndRender(target);
+        }
+
+        /// <summary>
+        /// Function to render an effect under the <see cref="Gorgon2DCompositor"/>.
+        /// </summary>
+        /// <param name="texture">The texture to render into the next target.</param>
+        /// <param name="output">The render target that will receive the final output.</param>
+        public void Render(GorgonTexture2DView texture, GorgonRenderTargetView output)
+        {
+            if ((texture == null) || (output == null))
+            {
+                return;
+            }
+
+            Graphics.SetRenderTarget(output);
+
+            Begin(GorgonBlendState.Default, GorgonDepthStencilState.Default, GorgonRasterState.Default, null);
+
+            Renderer.DrawFilledRectangle(new DX.RectangleF(0, 0, output.Width, output.Height),
+                                            GorgonColor.White,
+                                            texture,
+                                            new DX.RectangleF(0, 0, 1, 1));
+            End();
         }
         #endregion
 
